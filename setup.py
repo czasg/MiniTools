@@ -34,6 +34,10 @@ setup(
     author_email='chenziangsg@163.com',
     url='https://github.com/CzaOrz/MiniTools',
     packages=find_packages(),
+    install_requires=[
+        'parsel>=1.5.0',
+        'requests>=2.20.0',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
