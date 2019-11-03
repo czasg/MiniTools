@@ -1,6 +1,6 @@
 import re
 
-from minitools import get_current_path
+from minitools import next_page
 
 __all__ = 'test',
 
