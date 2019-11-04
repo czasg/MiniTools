@@ -1,4 +1,4 @@
-from minitools.spider import *
+from minitools.spider.thread_spider import *
 
 
 class MySpider(Spider):
