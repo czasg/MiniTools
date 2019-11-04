@@ -40,6 +40,7 @@ setup(
     install_requires=[
         'parsel>=1.5.0',
         'requests>=2.20.0',
+        'selenium>=3.141.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
