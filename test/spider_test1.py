@@ -9,11 +9,11 @@ class MySpider(Spider):
             yield Request(self)
 
     def parse(self, response):
-        print('parse')
-        self.add_request(Request(self, callback=self.parse2))
+        print(response.url)
+        yield Request(self, callback=self.parse2)
 
     def parse2(self, response):
-        print('parse2')
+        print(response.url)
 
 
 if __name__ == '__main__':

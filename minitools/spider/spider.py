@@ -1,4 +1,5 @@
 import queue
+
 from requests import session
 from parsel import Selector
 from urllib.parse import urljoin
@@ -14,16 +15,16 @@ running = 0
 
 class Response(Selector):
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
-                 '_parser', '_csstranslator', '_tostring_method', 'base_url']
+                 '_parser', '_csstranslator', '_tostring_method', 'url']
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None):
-        self.base_url = base_url
+                 base_url=None, _expr=None, url=None):
+        self.url = url
         self.text = text
         super(Response, self).__init__(text, type, namespaces, root, base_url, _expr)
 
     def urljoin(self, url):
-        return urljoin(self.base_url, url)
+        return urljoin(self.url, url)
 
 
 class Request:
@@ -46,14 +47,13 @@ class Request:
         text = self.session.request(self.method, self.url,
                                     data=self.data, headers=self.headers,
                                     params=self.params, json=self.json).text
-        self.done(text)
+        func = (self.callback or self.spider.parse)(Response(text=text, url=self.url))
         running -= 1
+        self.spider.add_request(None)
+        return func
 
     def set_session(self, session):
         self.session = session
-
-    def done(self, text):
-        (self.callback or self.spider.parse)(Response(text=text, base_url=self.url))
 
 
 class Spider:
@@ -74,10 +74,15 @@ class Spider:
         spider._run()
 
     def _run(self):
+        def _callback(future, add_request=self.add_request):
+            for request in (future.result() or []):
+                add_request(request)
+
         while (self.queue.qsize() or running):
             try:
-                request = self.queue.get(block=False)
-                self.executor.submit(request._run)
+                request = self.queue.get(block=True)
+                if request:
+                    self.executor.submit(request._run).add_done_callback(_callback)
             except queue.Empty:
                 continue
 
