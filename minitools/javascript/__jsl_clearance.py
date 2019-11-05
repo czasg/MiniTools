@@ -4,7 +4,7 @@ __all__ = "get_anti_spider_clearance",
 
 
 def get_anti_spider_clearance(js_string):
-    script_content = """
+    script_content = r"""
 var window = {
  headless: NaN
 }
@@ -14,7 +14,7 @@ var get_cookie = function(js_code) {
     eval(args)
 
 	var func = (xxx) => {
-	    var aim = y.replace(/\\b\w+\\b/g, (y) => {
+	    var aim = y.replace(/\b\w+\b/g, (y) => {
             return x[f(y, xxx) - 1] || ("_" + y)
 	    });
 	    return aim;
