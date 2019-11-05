@@ -41,6 +41,7 @@ setup(
         'parsel>=1.5.0',
         'requests>=2.20.0',
         'selenium>=3.141.0',
+        'PyExecJS>=1.5.1',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
