@@ -42,6 +42,7 @@ setup(
         'requests>=2.20.0',
         'selenium>=3.141.0',
         'PyExecJS>=1.5.1',
+        'pillow>=6.0.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
