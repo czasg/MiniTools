@@ -31,8 +31,8 @@ class BiliBiliLogin(SlideSelenium):
 
 
 if __name__ == '__main__':
-    account = '15607173521'
-    password = 'cza19950917'
+    account = 'test'
+    password = 'test'
     test = BiliBiliLogin(account, password)
     test.run()
     test.slide_test()
