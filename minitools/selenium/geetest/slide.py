@@ -15,6 +15,10 @@ class SlideSelenium(SeleniumBase):
     LEFT = 60
     BORDER = 0
 
+    def capture_interface(self):
+        """You must enter the geetest capture interface in this func"""
+        raise Exception("This func must be Implemented!")
+
     def get_slide_img(self, full=True):
         slide_img = self.waiter.until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, "canvas.geetest_canvas_slice")))
@@ -41,7 +45,7 @@ class SlideSelenium(SeleniumBase):
         screenshot = self.driver.get_screenshot_as_png()
         return Image.open(BytesIO(screenshot))
 
-    def get_gap(self, image1, image2):
+    def calculate_gap(self, image1, image2):
         for i in range(self.LEFT, image1.size[0]):
             for j in range(image1.size[1]):
                 if not self.is_pixel_equal(image1, image2, i, j):
@@ -58,7 +62,7 @@ class SlideSelenium(SeleniumBase):
         else:
             return False
 
-    def get_track(self, distance):
+    def calculate_track(self, distance):
         track = []
         current = 0
         mid = distance * 2 / 3
@@ -81,10 +85,8 @@ class SlideSelenium(SeleniumBase):
             track.append(-random.randint(1, 4))
         return track
 
-    def get_slider(self):
-        return self.waiter.until(EC.element_to_be_clickable((By.XPATH, '//*[@class="geetest_slider_button"]')))
-
-    def move_to_gap(self, button, track):
+    def move_to_gap(self, track):
+        button = self.waiter.until(EC.element_to_be_clickable((By.XPATH, '//*[@class="geetest_slider_button"]')))
         self.actors.click_and_hold(button).perform()
         for i in track:
             self.actors.move_by_offset(xoffset=i, yoffset=0).perform()
@@ -92,19 +94,17 @@ class SlideSelenium(SeleniumBase):
         self.sleep(0.5)
         self.actors.release().perform()
 
-    def move_to_gap2(self, button, track):
-        from selenium.webdriver import ActionChains
-        ActionChains(self.driver).click_and_hold(button).perform()
-        for i in track:
-            ActionChains(self.driver).move_by_offset(xoffset=i, yoffset=0).perform()
-            self.sleep(0.0005)
-        self.sleep(0.5)
-        ActionChains(self.driver).release().perform()
-
     def slide_test(self):
-        picture1 = self.get_slide_img(True)
-        picture2 = self.get_slide_img(False)
-        gap = self.get_gap(picture1, picture2)
-        track = self.get_track(gap - self.BORDER)
-        slider = self.get_slider()
-        self.move_to_gap(slider, track)
+        picture1 = self.get_slide_img(True)  # get first full picture
+        picture2 = self.get_slide_img(False)  # get second incomplete picture
+        gap = self.calculate_gap(picture1, picture2)  # calculate the gap between pictures
+        track = self.calculate_track(gap - self.BORDER)  # calculate the track so can move button to the gap
+        self.move_to_gap(track)  # move the button to the gap by track
+
+    def check(self):
+        """You Can add some check for result in here"""
+
+    def run(self):
+        self.capture_interface()
+        self.slide_test()
+        self.check()
