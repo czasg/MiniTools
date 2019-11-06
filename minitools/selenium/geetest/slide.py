@@ -1,7 +1,7 @@
 import random
 
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageChops
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
@@ -11,19 +11,16 @@ __all__ = "SlideSelenium",
 
 
 class SlideSelenium(SeleniumBase):
-    THRESHOLD = 60
-    LEFT = 60
-    BORDER = 0
 
     def capture_interface(self):
-        """You must enter the geetest capture interface in this func"""
-        raise Exception("This func must be Implemented!")
+        raise NotImplementedError("You must enter the geetest capture interface in this func")
 
     def get_slide_img(self, full=True):
         slide_img = self.waiter.until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, "canvas.geetest_canvas_slice")))
         full_img = self.waiter.until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, "canvas.geetest_canvas_fullbg")))
+        self.sleep(2)
         if full:
             self.driver.execute_script(
                 'document.getElementsByClassName("geetest_canvas_fullbg")[0].setAttribute("style", "")')
@@ -46,21 +43,26 @@ class SlideSelenium(SeleniumBase):
         return Image.open(BytesIO(screenshot))
 
     def calculate_gap(self, image1, image2):
-        for i in range(self.LEFT, image1.size[0]):
-            for j in range(image1.size[1]):
-                if not self.is_pixel_equal(image1, image2, i, j):
-                    return i
-        return self.LEFT
-
-    def is_pixel_equal(self, image1, image2, x, y):
-        pixel1 = image1.load()[x, y]
-        pixel2 = image2.load()[x, y]
-        if abs(pixel1[0] - pixel2[0]) < self.THRESHOLD and \
-                abs(pixel1[1] - pixel2[1]) < self.THRESHOLD and \
-                abs(pixel1[2] - pixel2[2]) < self.THRESHOLD:
-            return True
-        else:
-            return False
+        pic_diff = ImageChops.difference(image1, image2)
+        pic_diff = pic_diff.convert("L")
+        table = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        pic_diff = pic_diff.point(table, '1')
+        left = 43
+        pic_diff_rec = pic_diff.load()
+        for w in range(pic_diff.size[0] - 1, left, -1):
+            count = 0
+            for h in range(pic_diff.size[1] - 1, 0, -1):
+                if pic_diff_rec[w, h] == 1:
+                    count += 1
+                    if count > 5:
+                        return w - left
 
     def calculate_track(self, distance):
         track = []
@@ -98,7 +100,7 @@ class SlideSelenium(SeleniumBase):
         picture1 = self.get_slide_img(True)  # get first full picture
         picture2 = self.get_slide_img(False)  # get second incomplete picture
         gap = self.calculate_gap(picture1, picture2)  # calculate the gap between pictures
-        track = self.calculate_track(gap - self.BORDER)  # calculate the track so can move button to the gap
+        track = self.calculate_track(gap)  # calculate the track so can move button to the gap
         self.move_to_gap(track)  # move the button to the gap by track
 
     def check(self):

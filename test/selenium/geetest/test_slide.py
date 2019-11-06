@@ -27,7 +27,7 @@ class BiliBiliLogin(SlideSelenium):
         username.send_keys(self.account)
         self.sleep(0.3)
         passwd.send_keys(self.password)
-        self.sleep(2)
+        self.sleep(1)
         button.click()
 
     def run(self):
