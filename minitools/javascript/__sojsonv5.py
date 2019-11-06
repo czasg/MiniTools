@@ -312,4 +312,4 @@ def get_anti_spider_sojsonv5(js_string):
     """
     anti_js = execjs.compile(script_content)
     wzwschallenge = anti_js.call('get_redirect', wzWsQuestion, wzWsFactor)
-    return f"{dynamicUrl}?wzwschallenge{wzwschallenge}"
+    return f"{dynamicUrl}?wzwschallenge={wzwschallenge}"
