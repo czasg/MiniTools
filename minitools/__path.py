@@ -1,6 +1,6 @@
 import os
 
-__all__ = ('get_current_path', 'to_path')
+__all__ = ('get_current_path', 'to_path', 'current_file_path')
 
 
 def get_current_path(file=__file__):
@@ -9,6 +9,10 @@ def get_current_path(file=__file__):
 
 def to_path(*args):
     return (os.sep).join(args)
+
+
+def current_file_path(filename, filepath):
+    return to_path(get_current_path(filepath), filename)
 
 
 if __name__ == '__main__':
