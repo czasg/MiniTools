@@ -10,6 +10,7 @@ from setuptools import setup, find_packages
 2、python setup sdist
 3、twine upload dist/__packages__-__version__.tar.gz
 """
+
 if sys.version_info < (3, 6, 0):
     raise RuntimeError("minitools requires Python 3.6.0+")
 
