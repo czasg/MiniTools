@@ -14,7 +14,6 @@ def next_page(url, rule, step=1, replace=None):
 
 class HostFilter:
     def __init__(self, *allowed_domains):
-        assert isinstance(allowed_domains, typing.Iterable), "allowed_domains should be an Iterable data"
         allowed_domain_pattern = re.compile("^https?")
         for allowed_domain in allowed_domains:
             assert isinstance(allowed_domain, str), "domain should be an string"
