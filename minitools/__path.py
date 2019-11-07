@@ -13,8 +13,3 @@ def to_path(*args):
 
 def current_file_path(filename, filepath):
     return to_path(get_current_path(filepath), filename)
-
-
-if __name__ == '__main__':
-    print(get_current_path())
-    print(to_path(get_current_path(), 'czaOrz', 'test'))
