@@ -1,4 +1,5 @@
 import re
+import calendar
 
 from datetime import datetime, timedelta
 
@@ -34,6 +35,10 @@ def to_datetime(obj):
 class _DateTimeKiller:
 
     @classmethod
+    def create(cls, *args):
+        return datetime(*args)
+
+    @classmethod
     def get_now(cls):
         return datetime.now()
 
@@ -54,6 +59,19 @@ class _DateTimeKiller:
     @classmethod
     def get_tomorrow(cls):
         return cls.get_past_day(-1)
+
+    @classmethod
+    def get_len_of_month(cls, _datetime):
+        return calendar.monthlen(_datetime.year, _datetime.month)
+
+    @classmethod
+    def get_len_of_current_month(cls):
+        return cls.get_len_of_month(cls.get_now())
+
+    @classmethod
+    def head_and_tail_of_month(cls, _datetime):
+        return cls.create(_datetime.year, _datetime.month, 1), \
+               cls.create(_datetime.year, _datetime.month, cls.get_len_of_month(_datetime))
 
 
 timekiller = _DateTimeKiller
