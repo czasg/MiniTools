@@ -38,14 +38,6 @@ setup(
     author_email='chenziangsg@163.com',
     url='https://github.com/CzaOrz/MiniTools',
     packages=find_packages(),
-    install_requires=[
-        'parsel>=1.5.0',
-        'requests>=2.20.0',
-        'selenium>=3.141.0',
-        'PyExecJS>=1.5.1',
-        'pillow>=6.0.0',
-        'baidu-aip>=2.2.17.0',
-    ],
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
