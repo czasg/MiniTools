@@ -1,7 +1,12 @@
 import time
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver import ActionChains
+try:
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver import ActionChains
+except ModuleNotFoundError:
+    from minitools import throw_moduleNotFoundError
+
+    throw_moduleNotFoundError('pip install selenium>=3.141.0')
 
 
 class SeleniumBase:

@@ -2,7 +2,8 @@ import logging
 
 from logging.handlers import TimedRotatingFileHandler
 
-__all__ = ('create_logfile', 'init_logging_format', 'show_dynamic_ratio')
+__all__ = ('create_logfile', 'init_logging_format', 'show_dynamic_ratio',
+           'throw_moduleNotFoundError')
 
 
 def init_logging_format(format=None):
@@ -25,3 +26,7 @@ def show_dynamic_ratio(cur_count, all_count, text='rate'):
     percentage = int(ratio * 100)
     print("\r[{}] {}: {}/{} {}%".format(dynamic, text, cur_count, all_count, percentage),
           end='', flush=True)
+
+
+def throw_moduleNotFoundError(text):
+    raise RuntimeError("Please use `{}` to fetch this module!".format(text))
