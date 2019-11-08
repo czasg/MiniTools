@@ -16,11 +16,12 @@ class GithubCommitTimes(GithubBase):
     def commits_counts(self, start, end):
         current_month_first_day = timekiller.create(start, end, 1)
         current_month_last__day = timekiller.create(start, end, timekiller.get_len_of_month(current_month_first_day))
-        print(current_month_first_day, self.get_commit_by_datetime(current_month_first_day, current_month_last__day))
+        return current_month_first_day, self.get_commit_by_datetime(current_month_first_day, current_month_last__day)
 
-    def get_statistics_all_month(self, start_year):
+    def get_statistics_all_month(self, start_year=None):
         now = timekiller.get_now()
         current_year, current_month = now.year, now.month
+        start_year = start_year or current_year
         while start_year <= current_year:
             for month in range(1, 13):
                 if month > current_month and start_year == current_year:
@@ -32,5 +33,3 @@ class GithubCommitTimes(GithubBase):
         now = timekiller.get_now()
         year, month = (year, month) if year and month else (now.year, now.month)
         self.commits_counts(year, month)
-
-# todo GitHub Interface is change ????

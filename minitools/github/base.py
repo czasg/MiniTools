@@ -1,4 +1,9 @@
-from github import Github  # pip install PyGithub>=1.44.1
+try:
+    from github import Github
+except ModuleNotFoundError:
+    from minitools import throw_moduleNotFoundError
+
+    throw_moduleNotFoundError('pip install selenium>=3.141.0')
 
 
 class GithubBase:
