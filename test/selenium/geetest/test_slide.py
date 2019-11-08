@@ -4,10 +4,12 @@ from selenium.webdriver.common.by import By
 from minitools.selenium.geetest import SlideSelenium
 from selenium.webdriver.support import expected_conditions as EC
 
-"""
-BiLiBiLi: 模拟登陆
-https://passport.bilibili.com/login
-"""
+
+def run_bilibili_test():
+    account = 'test'
+    password = 'test'
+    test = BiliBiliLogin(account, password)
+    test.run()
 
 
 class BiliBiliLogin(SlideSelenium):
@@ -34,8 +36,26 @@ class BiliBiliLogin(SlideSelenium):
         super(BiliBiliLogin, self).run()
 
 
-if __name__ == '__main__':
-    account = 'test'
-    password = 'test'
-    test = BiliBiliLogin(account, password)
+def run_adminpunishment_test():
+    test = AdminPunishment()
     test.run()
+
+
+class AdminPunishment(SlideSelenium):
+
+    def __init__(self):
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option('excludeSwitches', ['enable-automation'])
+        self.driver = webdriver.Chrome('D:\chromedriver.exe', options=options)
+        self.driver.get("http://credit.wuhu.gov.cn/whweb/xygs/licening")
+        self.init_property()
+
+    def capture_interface(self):
+        self.sleep(3)
+
+    def run(self):
+        super(AdminPunishment, self).run()
+
+
+if __name__ == '__main__':
+    run_adminpunishment_test()
