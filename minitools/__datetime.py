@@ -1,0 +1,59 @@
+import re
+
+from datetime import datetime, timedelta
+
+__all__ = ('to_datetime', 'str2datetime', 'timekiller')
+
+RE_SEARCH_D4_D2 = re.compile("(\d{4})[^\d]*(\d{2})[^\d]*(\d{0,2})[^\d]*(\d{0,2})[^\d]*(\d{0,2})[^\d]*(\d{0,2})").search
+
+
+def str2datetime(string):
+    d4d2 = RE_SEARCH_D4_D2(string)
+    if not d4d2: return None
+
+    lower_limit = [1000, 1, 1, 0, 0, 0]  # Using the lower limit as the default time
+    upper_limit = [9999, 12, 31, 23, 59, 59]
+
+    for index in range(6):
+        match_key = int(d4d2.group(index + 1) or 0)
+        if match_key and lower_limit[index] < match_key < upper_limit[index]:
+            lower_limit[index] = match_key
+
+    return datetime(*lower_limit)
+
+
+def to_datetime(obj):
+    if isinstance(obj, datetime):
+        return obj
+    elif isinstance(obj, str):
+        return str2datetime(obj)
+    else:
+        raise NotImplemented(f"No func process {type(obj)} to datetime")
+
+
+class _DateTimeKiller:
+
+    @classmethod
+    def get_now(cls):
+        return datetime.now()
+
+    @classmethod
+    def get_today(cls):
+        now = cls.get_now()
+        return datetime(now.year, now.month, now.day)
+
+    @classmethod
+    def get_past_day(cls, days):
+        today = cls.get_today()
+        return today - timedelta(days=days)
+
+    @classmethod
+    def get_yesterday(cls):
+        return cls.get_past_day(1)
+
+    @classmethod
+    def get_tomorrow(cls):
+        return cls.get_past_day(-1)
+
+
+timekiller = _DateTimeKiller
