@@ -1,6 +1,6 @@
 import threading
 
-__all__ = ('timeout', 'get_lock', 'get_rlock', 'get_condition', 'get_local')
+__all__ = ('timeout', 'get_lock', 'get_condition', 'get_local')
 
 
 def timeout(func=None, timeout=20):
@@ -36,12 +36,6 @@ class ThreadingArgs:
         return cls.lock
 
     @classmethod
-    def get_rlock(cls):
-        if not cls.rlock:
-            cls.rlock = threading.RLock()
-        return cls.rlock
-
-    @classmethod
     def get_condition(cls):
         if not cls.condition:
             cls.condition = threading.Condition()
@@ -55,6 +49,5 @@ class ThreadingArgs:
 
 
 get_lock = ThreadingArgs.get_lock
-get_rlock = ThreadingArgs.get_rlock
 get_condition = ThreadingArgs.get_condition
 get_local = ThreadingArgs.get_local
