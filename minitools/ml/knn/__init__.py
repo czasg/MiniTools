@@ -2,7 +2,7 @@ import numpy as np
 
 from collections import OrderedDict
 
-from minitools.ml.base import classification, supervised
+from minitools.ml.base import Classification, SupervisedLearning
 
 __all__ = 'KNearestNeighbor',
 
@@ -15,7 +15,7 @@ THEORY:   using training data set to partition the feature-vector-space
 """
 
 
-class KNearestNeighbor(classification(), supervised()):
+class KNearestNeighbor(Classification, SupervisedLearning):
     k = 1
 
     @classmethod
