@@ -18,6 +18,7 @@ class MetaClassBase(type):
 
 class MachineLearning(metaclass=MetaClassBase):
     """Machine Learning Base"""
+    machine_learning_type = None
 
     def collect_data(self, *args, **kwargs):
         """Collect data"""
@@ -33,6 +34,11 @@ class MachineLearning(metaclass=MetaClassBase):
 
     def result(self, *args, **kwargs):
         """Using the algorithm"""
+
+    def __repr__(self):
+        return f"This is MachineLearning of {self.machine_learning_type}"
+
+    __str__ = __repr__
 
 
 class Classification(MachineLearning):
