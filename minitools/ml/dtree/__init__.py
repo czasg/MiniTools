@@ -37,6 +37,9 @@ class DecisionTree(Classification, SupervisedLearning):
                 featureIndex = index
         return featureIndex
 
+    def max(self, dataSetlist):
+        return collections.Counter(dataSetlist).most_common(1)[0][1]
+
 
 if __name__ == '__main__':
     test = DecisionTree()
@@ -62,3 +65,5 @@ if __name__ == '__main__':
     ])
     test4 = np.array([1, 1, 1, 1, 0, 0])
     print(test.chooseFeature(test3, test4))
+
+    print(test.max(test4))
