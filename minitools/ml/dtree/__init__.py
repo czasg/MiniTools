@@ -4,6 +4,16 @@ import numpy as np
 
 from minitools.ml.base import Classification, SupervisedLearning
 
+__all__ = "DecisionTree", "createDTree",
+
+"""
+ELEMENT:  value of K / distance measure / classified decision rule
+INPUT:    the feature-vector of the instance
+OUTPUT:   the class of instance
+MODEL:    the training data set
+THEORY:   using training data set to partition the feature-vector-space
+"""
+
 
 class DecisionTree(Classification, SupervisedLearning):
 
@@ -46,55 +56,33 @@ class DecisionTree(Classification, SupervisedLearning):
         return featureIndex
 
 
-def createDTree(dataSet: np.ndarray, dataSetLabel):
+def createDTree(dataSet: np.ndarray, dataSetLabel, dataSetColumnLabel: list):
     dataSetLabelCounter = collections.Counter(dataSetLabel)
     if dataSetLabelCounter.__len__() == 1 or len(dataSet[0]) == 1:
         return dataSetLabelCounter.most_common(1)[0][0]
-    nextFutureIndex = DecisionTree.chooseFeature(dataSet, dataSetLabel)
-    print(nextFutureIndex)
-    nextFutureDataSetLabel = dataSetLabel[nextFutureIndex]
+    nextFutureIndex = DecisionTree.chooseFeature(dataSet, dataSetLabel)  # todo nextFutureIndex 取值就只有012啊，这辈子都取不到女生啊
+    nextFutureDataSetLabel = dataSetColumnLabel.pop(min(nextFutureIndex, (len(dataSetColumnLabel) - 1)))
     decisionTree = {nextFutureDataSetLabel: {}}
     uniqueVals = set(dataSet.T[nextFutureIndex])
     for value in uniqueVals:
         dataSetNew, dataSetLabelNew = DecisionTree.splitdataSetLabel(dataSet, dataSetLabel, nextFutureIndex, value)
-        decisionTree[nextFutureDataSetLabel][value] = createDTree(dataSetNew, dataSetLabelNew)
+        decisionTree[nextFutureDataSetLabel][value] = createDTree(dataSetNew, dataSetLabel, dataSetColumnLabel)
     return decisionTree
+
 
 if __name__ == '__main__':
     test = DecisionTree()
 
-    test1 = np.array([
-        [1, 1],
-        [1, 1],
-        [1, 0],
-        [0, 1],
-        [0, 1],
-    ])
-    test2 = np.array([1, 1, 2, 2, 2])
-
-    # print(test.chooseFeature(test1, test2))
-
-    test3 = np.array([
-        [1, 1, 1],
-        [1, 0, 1],
-        [0, 1, 1],
-        [1, 0, 0],
-        [0, 0, 1],
-        [0, 0, 0]
-    ])
-    test4 = np.array(['cza', 'cza', 'cza', 'cza', '0-0', '0-0'])
-    # print(test.chooseFeature(test3, test4))
-
-    # print(test.max(test4))
-
-    # print(createDTree(test3, test4))
-
-    tt = np.array([
-        [1, ],
-        [1, ],
-        [2, ],
-    ])
-    # print(test.splitdataSetLabel(tt, [1, 2, 1], 0, 1))
-
+    test1 = [
+            [0,0,1,],
+            [0,0,1,],
+            [0,1,0,],
+            [1,0,1,],
+            [0,1,1,],
+            [1,1,0,],
+            [1,1,0,],
+        ]
+    test2 = ['男', '男', '男', '男','女', '女', '女']
     from pprint import pprint
-    pprint(createDTree(test3, test4))
+    import json
+    pprint(createDTree(np.array(test1), test2, ['头发长', '长得靓', '个子高']))

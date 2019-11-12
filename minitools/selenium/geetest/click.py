@@ -13,8 +13,7 @@ __all__ = 'ClickSelenium',
 class ClickSelenium(SeleniumBase):
 
     def capture_interface(self):
-        """You must enter the geetest capture interface in this func"""
-        raise Exception("This func must be Implemented!")
+        raise NotImplementedError("You must enter the geetest capture interface in this func")
 
     def get_click_img(self):
         element = self.waiter.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".geetest_item_img")))
