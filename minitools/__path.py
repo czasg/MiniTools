@@ -1,5 +1,8 @@
 import os
+import time
 import shutil
+import weakref
+import collections
 
 from .__logging import show_dynamic_ratio
 
@@ -87,3 +90,33 @@ def modify_file_content(string, replace='', filename='', folder='', path='.'):
     print("{} -> {}".format(string, replace))
     print("file count: {}".format(len(files)))
     print("modify count: {}".format(count))
+
+
+class MiniCache:  # todo， 参考scrapy的弱引用，应该可以学到不少
+    notFound = object()
+
+    class Dict(dict):
+        def __del__(self):
+            pass
+
+    def __init__(self, maxLen=10):
+        self.weak = weakref.WeakValueDictionary()
+        self.strong = collections.deque(maxlen=maxLen)
+
+    @staticmethod
+    def getNowTime():
+        return int(time.time())
+
+    def get(self, key):
+        temp = self.weak.copy()
+        for key, value in temp.items():
+            if self.getNowTime() > value[r'expire']:
+                self.weak.pop(key)
+        value = self.weak.get(key, self.notFound)
+        if value is self.notFound or self.getNowTime() > value[r'expire']:
+            return self.notFound
+        return value
+
+    def set(self, key, value):
+        self.weak[key] = strongRef = MiniCache.Dict(value)
+        self.strong.append(strongRef)
