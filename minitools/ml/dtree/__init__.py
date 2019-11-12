@@ -14,7 +14,7 @@ MODEL:    the training data set
 THEORY:   using training data set to partition the feature-vector-space
 """
 
-
+from pprint import pprint
 class DecisionTree(Classification, SupervisedLearning):
 
     @classmethod
@@ -31,11 +31,15 @@ class DecisionTree(Classification, SupervisedLearning):
         dataSetNew = []
         dataSetLabelNew = []
         for i, dataSetRow in enumerate(dataSet.tolist()):
+            # print(dataSetRow)
             if dataSetRow[index] == value:
                 reduceDataVec = dataSetRow[:index]
                 reduceDataVec.extend(dataSetRow[index + 1:])
                 dataSetNew.append(reduceDataVec)
                 dataSetLabelNew.append(dataSetLabel[i])
+        # print(dataSetLabelNew)
+        # pprint(np.array(dataSetNew))
+        # raise
         return np.array(dataSetNew), dataSetLabelNew
 
     @classmethod
@@ -57,6 +61,7 @@ class DecisionTree(Classification, SupervisedLearning):
 
 
 def createDTree(dataSet: np.ndarray, dataSetLabel, dataSetColumnLabel: list):
+    print(dataSetLabel, dataSetColumnLabel)
     dataSetLabelCounter = collections.Counter(dataSetLabel)
     if dataSetLabelCounter.__len__() == 1 or len(dataSet[0]) == 1:
         return dataSetLabelCounter.most_common(1)[0][0]
@@ -66,7 +71,7 @@ def createDTree(dataSet: np.ndarray, dataSetLabel, dataSetColumnLabel: list):
     uniqueVals = set(dataSet.T[nextFutureIndex])
     for value in uniqueVals:
         dataSetNew, dataSetLabelNew = DecisionTree.splitdataSetLabel(dataSet, dataSetLabel, nextFutureIndex, value)
-        decisionTree[nextFutureDataSetLabel][value] = createDTree(dataSetNew, dataSetLabel, dataSetColumnLabel)
+        decisionTree[nextFutureDataSetLabel][value] = createDTree(dataSetNew, dataSetLabelNew, dataSetColumnLabel)
     return decisionTree
 
 
@@ -74,15 +79,16 @@ if __name__ == '__main__':
     test = DecisionTree()
 
     test1 = [
-            [0,0,1,],
-            [0,0,1,],
-            [0,1,0,],
-            [1,0,1,],
-            [0,1,1,],
-            [1,1,0,],
-            [1,1,0,],
-        ]
-    test2 = ['男', '男', '男', '男','女', '女', '女']
-    from pprint import pprint
+        [0, 0, 1, ],
+        [0, 0, 1, ],
+        [0, 1, 0, ],
+        [1, 0, 1, ],
+        [0, 1, 1, ],
+        [1, 1, 0, ],
+        [1, 1, 0, ],
+    ]
+    test2 = ['男', '男', '男', '男', '女', '女', '女']
+
     import json
+
     pprint(createDTree(np.array(test1), test2, ['头发长', '长得靓', '个子高']))
