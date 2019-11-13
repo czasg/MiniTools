@@ -7,12 +7,12 @@ from minitools.ml.base import Classification, SupervisedLearning
 __all__ = "DecisionTree", "createDTree",
 
 """
-ELEMENT:  value of K / distance measure / classified decision rule
-INPUT:    the feature-vector of the instance
-OUTPUT:   the class of instance
+ELEMENT:  entropy
+INPUT:    dataSet + dataSetLabel + dataSetColumn
+OUTPUT:   decision tree of dateSet
 MODEL:    the training data set
-THEORY:   using training data set to partition the feature-vector-space
-FORMULA:  d(x, y) = (∑(x(i) - y(i))**2) ** 0.5
+THEORY:   using training data set to calculate the Model by most step of entropy reduction
+FORMULA:  entropy = -∑p(x)log2p(x)
 """
 
 
