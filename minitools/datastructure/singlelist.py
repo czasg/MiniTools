@@ -1,17 +1,5 @@
 __all__ = "SingleList",
 
-"""
-is_empty() 链表是否为空
-length() 链表长度
-travel() 遍历整个链表
-add(item) 链表头部添加元素
-append(item) 链表尾部添加元素
-insert(pos, item) 指定位置添加元素
-remove(item) 删除节点
-search(item) 查找节点是否存在
-
-"""
-
 
 class Node:
     def __init__(self, value):
@@ -21,6 +9,10 @@ class Node:
 
 class SingleList:
     __head = None
+    __next = None
+
+    class LastObject:
+        pass
 
     def __init__(self, *nodes):
         for node in nodes:
@@ -92,11 +84,11 @@ class SingleList:
         del self.__head
         self.__head = None
 
-    def traverse(self):
-        cur = self.__head
-        while cur:
-            print(cur.value)
-            cur = cur.next
+    def __repr__(self):
+        content = "["
+        for nodeVal in self:
+            content += str(nodeVal) + ", "
+        return content + "]"
 
     def __len__(self, default=0):
         cur = self.__head
@@ -105,30 +97,53 @@ class SingleList:
             cur = cur.next
         return default
 
-    # def __getitem__(self, item):
-    #     return item
+    def __getitem__(self, index: int):
+        length = self.__len__()
+        assert abs(index) < length, "list index out of range"
+        cur = self.__head
+        index += length if index < 0 else 0
+        while index:
+            cur = cur.next
+            index -= 1
+        return cur.value
+
+    def __setitem__(self, index, value):
+        length = self.__len__()
+        assert abs(index) < length, "list index out of range"
+        cur = self.__head
+        index += length if index < 0 else 0
+        while index:
+            cur = cur.next
+            index -= 1
+        cur.value = value
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        temp = getattr(self, 'temp', None)
-        cur = self.__head
-        while cur:
-            yield cur.value
-            cur = cur.next
-        # return self
+        cur = self.__next = self.__head if self.__next is None else self.__next
+        if cur is self.LastObject:
+            self.__next = None
+            raise StopIteration
+        elif cur.next:
+            self.__next = cur.next
+            return cur.value
+        else:
+            self.__next = self.LastObject
+            return cur.value
 
+    __str__ = __repr__
     __hash__ = None
 
 
 if __name__ == '__main__':
     test = SingleList(1, 2, 3, 4, 5, 6)
 
-    # for i, j in enumerate(test):
-    #     if i == 10:
-    #         break
-    #     print(j)
+    # for i in test:
+    #     print(i)
 
+    # print(test[-1])
+    # test[-1] = 12345
+    print(test)
 
-
+    # print([123].__repr__())
