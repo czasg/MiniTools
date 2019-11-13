@@ -112,6 +112,7 @@ class SingleList:
         return self
 
     def __next__(self):
+        temp = getattr(self, 'temp', None)
         cur = self.__head
         while cur:
             yield cur.value
