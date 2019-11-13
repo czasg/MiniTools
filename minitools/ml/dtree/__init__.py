@@ -12,9 +12,10 @@ INPUT:    the feature-vector of the instance
 OUTPUT:   the class of instance
 MODEL:    the training data set
 THEORY:   using training data set to partition the feature-vector-space
+FORMULA:  d(x, y) = (∑(x(i) - y(i))**2) ** 0.5
 """
 
-from pprint import pprint
+
 class DecisionTree(Classification, SupervisedLearning):
 
     @classmethod
@@ -31,19 +32,16 @@ class DecisionTree(Classification, SupervisedLearning):
         dataSetNew = []
         dataSetLabelNew = []
         for i, dataSetRow in enumerate(dataSet.tolist()):
-            # print(dataSetRow)
             if dataSetRow[index] == value:
                 reduceDataVec = dataSetRow[:index]
                 reduceDataVec.extend(dataSetRow[index + 1:])
                 dataSetNew.append(reduceDataVec)
                 dataSetLabelNew.append(dataSetLabel[i])
-        # print(dataSetLabelNew)
-        # pprint(np.array(dataSetNew))
-        # raise
         return np.array(dataSetNew), dataSetLabelNew
 
     @classmethod
     def chooseFeature(cls, dataSet: np.ndarray, dataSetLabel, featureIndex=-1):
+        assert len(dataSet) == len(dataSetLabel)
         length = float(len(dataSet))
         initEntropy = cls.calculateEntropy(dataSetLabel)
         baseMeasure = 0.0
@@ -61,34 +59,15 @@ class DecisionTree(Classification, SupervisedLearning):
 
 
 def createDTree(dataSet: np.ndarray, dataSetLabel, dataSetColumnLabel: list):
-    print(dataSetLabel, dataSetColumnLabel)
     dataSetLabelCounter = collections.Counter(dataSetLabel)
-    if dataSetLabelCounter.__len__() == 1 or len(dataSet[0]) == 1:
+    if dataSetLabelCounter.__len__() == 1 or len(dataSet[0]) == 0:
         return dataSetLabelCounter.most_common(1)[0][0]
-    nextFutureIndex = DecisionTree.chooseFeature(dataSet, dataSetLabel)  # todo nextFutureIndex 取值就只有012啊，这辈子都取不到女生啊
+    nextFutureIndex = DecisionTree.chooseFeature(dataSet, dataSetLabel)
     nextFutureDataSetLabel = dataSetColumnLabel.pop(min(nextFutureIndex, (len(dataSetColumnLabel) - 1)))
     decisionTree = {nextFutureDataSetLabel: {}}
     uniqueVals = set(dataSet.T[nextFutureIndex])
     for value in uniqueVals:
         dataSetNew, dataSetLabelNew = DecisionTree.splitdataSetLabel(dataSet, dataSetLabel, nextFutureIndex, value)
-        decisionTree[nextFutureDataSetLabel][value] = createDTree(dataSetNew, dataSetLabelNew, dataSetColumnLabel)
+        nextDataSetColumnLabel = dataSetColumnLabel[:]
+        decisionTree[nextFutureDataSetLabel][value] = createDTree(dataSetNew, dataSetLabelNew, nextDataSetColumnLabel)
     return decisionTree
-
-
-if __name__ == '__main__':
-    test = DecisionTree()
-
-    test1 = [
-        [0, 0, 1, ],
-        [0, 0, 1, ],
-        [0, 1, 0, ],
-        [1, 0, 1, ],
-        [0, 1, 1, ],
-        [1, 1, 0, ],
-        [1, 1, 0, ],
-    ]
-    test2 = ['男', '男', '男', '男', '女', '女', '女']
-
-    import json
-
-    pprint(createDTree(np.array(test1), test2, ['头发长', '长得靓', '个子高']))

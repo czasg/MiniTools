@@ -12,6 +12,7 @@ INPUT:    the feature-vector of the instance
 OUTPUT:   the class of instance
 MODEL:    the training data set
 THEORY:   using training data set to partition the feature-vector-space
+FORMULA:  d(x, y) = (∑(x(i) - y(i))**2) ** 0.5
 """
 
 
