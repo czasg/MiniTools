@@ -1,8 +1,9 @@
 import numpy as np
 
-from collections import OrderedDict
+from collections import Counter
 
 from minitools.ml.base import Classification, SupervisedLearning
+from minitools.datastructure import SingleList
 
 __all__ = 'KNearestNeighbor',
 
@@ -21,7 +22,7 @@ class KNearestNeighbor(Classification, SupervisedLearning):
 
     @classmethod
     def box2vector(cls, box: np.ndarray) -> np.ndarray:
-        vector = []
+        vector = SingleList()
         for row in box:
             vector.extend(row)
         return np.array(vector)
@@ -36,9 +37,15 @@ class KNearestNeighbor(Classification, SupervisedLearning):
     @classmethod
     def classify(cls, vector: np.ndarray, trainSet: np.ndarray, trainLabel: list):
         sortedDistIndicies = (((np.tile(vector, (trainSet.shape[0], 1)) - trainSet) ** 2).sum(axis=1) ** 0.5).argsort()
-        classCount = OrderedDict()
-        for i in range(cls.k):
-            kLabel = trainLabel[sortedDistIndicies[i]]
-            classCount[kLabel] = classCount.get(kLabel, 0) + 1
-        resSorted = sorted(classCount.items(), key=lambda x: x[1], reverse=True)
-        return resSorted[0][0]
+        return Counter([trainLabel[sortedDistIndicies[i]] for i in range(cls.k)]).most_common(1)[0][0]
+
+
+if __name__ == '__main__':
+    trainSet = np.array([
+        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+    ])
+    trainLabel = ['A', 'B', 'C', 'D']
+    print(KNearestNeighbor.classify(np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]), trainSet, trainLabel))
