@@ -18,9 +18,6 @@ class SingleList:
         for node in nodes:
             self.append(node)
 
-    def is_empty(self):
-        return self.__head == None
-
     def appendleft(self, value):
         node = Node(value)
         node.next = self.__head
@@ -51,21 +48,47 @@ class SingleList:
             node.next = prior.next
             prior.next = node
 
+    def pop(self, index=-1):
+        length = self.__len__()
+        assert abs(index) < length, "list index out of range"
+        cur = self.__head
+        prior = None
+        index += length if index < 0 else 0
+        while index:
+            prior = cur
+            cur = cur.next
+            index -= 1
+        self.__exchange(cur, prior)
+        return cur.value
+
     def remove(self, value):
         assert self.__head, "Empty SingleList"
         cur = self.__head
         prior = None
         while cur:
             if value == cur.value:
-                if cur == self.__head:
-                    self.__head = cur.next
-                else:
-                    prior.next = cur.next
-                return
+                return self.__exchange(cur, prior)
             else:
                 prior = cur
                 cur = cur.next
         raise ValueError("SingleList.remove(x): x not in list")
+
+    def __exchange(self, cur, prior):
+        if cur == self.__head:
+            self.__head = cur.next
+        else:
+            prior.next = cur.next
+
+    def reverse(self):
+        assert self.__head, "Empty SingleList"
+        cur = self.__head
+        prior = None
+        while cur:
+            next = cur.next
+            cur.next = prior
+            prior = cur
+            cur = next
+        self.__head = prior
 
     def index(self, value, index=0):
         assert self.__head, "Empty SingleList"
@@ -85,10 +108,7 @@ class SingleList:
         self.__head = None
 
     def __repr__(self):
-        content = "["
-        for nodeVal in self:
-            content += str(nodeVal) + ", "
-        return content + "]"
+        return f"{self.__class__.__name__}{[node for node in self]}"
 
     def __len__(self, default=0):
         cur = self.__head
@@ -96,6 +116,9 @@ class SingleList:
             default += 1
             cur = cur.next
         return default
+
+    def __eq__(self, other):
+        return [node for node in self] == other
 
     def __getitem__(self, index: int):
         length = self.__len__()
@@ -121,6 +144,8 @@ class SingleList:
         return self
 
     def __next__(self):
+        if not self.__head:
+            raise StopIteration
         cur = self.__next = self.__head if self.__next is None else self.__next
         if cur is self.LastObject:
             self.__next = None
@@ -137,13 +162,21 @@ class SingleList:
 
 
 if __name__ == '__main__':
-    test = SingleList(1, 2, 3, 4, 5, 6)
+    single = SingleList(1, 2, 3, 4, 5, 6)  # SingleList[1, 2, 3, 4, 5, 6]
+    single.append(7)  # SingleList[1, 2, 3, 4, 5, 6, 7]
+    single.appendleft(0)  # SingleList[0, 1, 2, 3, 4, 5, 6, 7]
+    single.insert(2, 1.5)  # SingleList[0, 1, 1.5, 2, 3, 4, 5, 6, 7]
+    single.pop()  # SingleList[0, 1, 1.5, 2, 3, 4, 5, 6]
+    single.remove(1.5)  # SingleList[0, 1, 2, 3, 4, 5, 6]
+    single.reverse()  # SingleList[6, 5, 4, 3, 2, 1, 0]
+    single.index(2)  # return 4
+    single.clear()  # SingleList[]
+    if not single:
+        print("This is an empty SingleList")
 
-    # for i in test:
-    #     print(i)
+    single.append(1)
+    for i in single:
+        print(i)  # return 1
 
-    # print(test[-1])
-    # test[-1] = 12345
-    print(test)
-
-    # print([123].__repr__())
+    if (single == [1]):
+        print("Test Ok")
