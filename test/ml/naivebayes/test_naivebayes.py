@@ -17,8 +17,8 @@ if __name__ == '__main__':
     # _trainSets = trainSets[:]
     # trainSets[:] = []
     # for trainSet in _trainSets:
-    #     new = [i for i in set(jieba.cut(trainSet, cut_all=True)) if len(i) > 1]
-    #     trainSets.append(new or [''])
+    #     new = [i for i in set(jieba.cut(trainSet, cut_all=False)) if len(i) > 0]
+    #     trainSets.append(new)
     # assert len(trainSets) == len(trainSetLabels)
     # wordsSet = NaiveBayes.generatingSet(*trainSets)
     #
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     test3 = "关于印发《武汉市职工基本养老保险参保补缴暂行办法》的通知(武人社规〔2017〕2号)"
     test4 = "省人民政府办公厅关于进一步降低企业成本振兴实体经济的意见（鄂政办发[2017]24号）"
 
-    ttt = [test4]#[test1, test2, test3, test4]
+    ttt = [test1, test2, test3, test4]
     for t in ttt:
         words = [i for i in set(jieba.cut(t, cut_all=True)) if len(i) > 1]
         vector = NaiveBayes.set2vector(words, wordsSet)

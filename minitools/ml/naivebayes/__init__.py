@@ -24,9 +24,9 @@ class NaiveBayes(Classification, SupervisedLearning):
     @classmethod
     def set2vector(cls, words, wordsSet: list):
         vector = [0 for _ in range(len(wordsSet))]
-        for word in set(words):
+        for word in words:
             if word in wordsSet:
-                vector[wordsSet.index(word)] = 1
+                vector[wordsSet.index(word)] += 1
         return vector
 
     @classmethod
@@ -36,6 +36,7 @@ class NaiveBayes(Classification, SupervisedLearning):
         trainSetRowLenght = len(trainSets[0])
         doc = dict()
         for key, count in collections.Counter(trainSetLabels).items():
+            print(float(count) / float(trainSetLabelLength), key)
             doc[key] = [float(count) / float(trainSetLabelLength), np.ones(trainSetRowLenght), uniqueLabelLength]
         for index, trainSet in enumerate(trainSets):
             doc[trainSetLabels[index]][1] += trainSet
@@ -48,13 +49,10 @@ class NaiveBayes(Classification, SupervisedLearning):
         resLabel = None
         for trainSet in trainSets:
             predict = np.sum(dataSet * np.array(trainSet[1])) + np.log(trainSet[2])
-            if trainSet[0] == '领导信息':
-                continue
             if resData is None:
                 resData = predict
                 resLabel = trainSet[0]
                 continue
-            print(predict, resLabel)
             if predict > resData:
                 resData = predict
                 resLabel = trainSet[0]
@@ -63,12 +61,12 @@ class NaiveBayes(Classification, SupervisedLearning):
 
 if __name__ == '__main__':
     a = np.array([
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
     ])
-    b = ['A', 'B', 'C', 'D']
+    b = ['A', 'B', 'D', 'D']
 
     trainSets = NaiveBayes.trainDataSet(a, b)
     a = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
