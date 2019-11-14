@@ -56,3 +56,13 @@ class Ziru(KNearestNeighbor):
 
     def get_price(self, body: bytes):
         return [self.classify0(r) for r in self.process(body)]
+
+
+"""
+Ziru.createTrainingSet("4983571602.png")
+
+zr = Ziru("4983571602.txt")
+
+with open("4978123605.png", 'rb') as f:
+    print(zr.get_price(f.read()))
+"""
