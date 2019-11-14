@@ -11,6 +11,10 @@ class SingleList:
     __head = None
     __next = None
 
+    @property
+    def head(self):
+        return self.__head
+
     class LastObject:
         pass
 
@@ -47,6 +51,22 @@ class SingleList:
                 count += 1
             node.next = prior.next
             prior.next = node
+
+    def extend(self, dataSet):
+        singleList = self.__buildSingleList(dataSet)
+        if not self.__head:
+            self.__head = singleList.head
+            return
+        cur = self.__head
+        while cur.next:
+            cur = cur.next
+        cur.next = singleList.head
+
+    def __buildSingleList(self, dataSet):
+        singleList = dataSet
+        if not isinstance(singleList, SingleList):
+            singleList = SingleList(*dataSet)
+        return singleList
 
     def pop(self, index=-1):
         length = self.__len__()
@@ -180,3 +200,5 @@ if __name__ == '__main__':
 
     if (single == [1]):
         print("Test Ok")
+
+    single.extend([1, 2, 3])  # SingleList[1, 1, 2, 3]
