@@ -45,10 +45,10 @@ class SinglyLinkedList:
         else:
             node = Node(value)
             prior = self.__head
-            count = 0
-            while count < (index - 1):
+            index = index - 1
+            while index:
                 prior = prior.next
-                count += 1
+                index -= 1
             node.next = prior.next
             prior.next = node
 
