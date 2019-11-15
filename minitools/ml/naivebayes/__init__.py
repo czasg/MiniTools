@@ -36,7 +36,6 @@ class NaiveBayes(Classification, SupervisedLearning):
         trainSetRowLenght = len(trainSets[0])
         doc = dict()
         for key, count in collections.Counter(trainSetLabels).items():
-            print(float(count) / float(trainSetLabelLength), key)
             doc[key] = [float(count) / float(trainSetLabelLength), np.ones(trainSetRowLenght), uniqueLabelLength]
         for index, trainSet in enumerate(trainSets):
             doc[trainSetLabels[index]][1] += trainSet
@@ -53,7 +52,7 @@ class NaiveBayes(Classification, SupervisedLearning):
                 resData = predict
                 resLabel = trainSet[0]
                 continue
-            if predict > resData:
+            if predict >= resData:
                 resData = predict
                 resLabel = trainSet[0]
         return resLabel
