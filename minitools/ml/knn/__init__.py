@@ -3,7 +3,7 @@ import numpy as np
 from collections import Counter
 
 from minitools.ml.base import Classification, SupervisedLearning
-from minitools.datastructure import SingleList
+from minitools.datastructure import slist
 
 __all__ = 'KNearestNeighbor',
 
@@ -22,7 +22,7 @@ class KNearestNeighbor(Classification, SupervisedLearning):
 
     @classmethod
     def box2vector(cls, box: np.ndarray) -> np.ndarray:
-        vector = SingleList()
+        vector = slist()
         for row in box:
             vector.extend(row)
         return np.array(vector)

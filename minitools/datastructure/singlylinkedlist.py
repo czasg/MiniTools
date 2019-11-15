@@ -1,4 +1,4 @@
-__all__ = "SingleList",
+__all__ = "slist",
 
 
 class Node:
@@ -7,7 +7,7 @@ class Node:
         self.next = None
 
 
-class SingleList:
+class SinglyLinkedList:
     __head = None
     __next = None
 
@@ -64,8 +64,8 @@ class SingleList:
 
     def __buildSingleList(self, dataSet):
         singleList = dataSet
-        if not isinstance(singleList, SingleList):
-            singleList = SingleList(*dataSet)
+        if not isinstance(singleList, SinglyLinkedList):
+            singleList = SinglyLinkedList(*dataSet)
         return singleList
 
     def pop(self, index=-1):
@@ -181,8 +181,10 @@ class SingleList:
     __hash__ = None
 
 
+slist = SinglyLinkedList
+
 if __name__ == '__main__':
-    single = SingleList(1, 2, 3, 4, 5, 6)  # SingleList[1, 2, 3, 4, 5, 6]
+    single = SinglyLinkedList(1, 2, 3, 4, 5, 6)  # SingleList[1, 2, 3, 4, 5, 6]
     single.append(7)  # SingleList[1, 2, 3, 4, 5, 6, 7]
     single.appendleft(0)  # SingleList[0, 1, 2, 3, 4, 5, 6, 7]
     single.insert(2, 1.5)  # SingleList[0, 1, 1.5, 2, 3, 4, 5, 6, 7]
