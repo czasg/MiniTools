@@ -68,6 +68,8 @@ if __name__ == '__main__':
     b = ['A', 'B', 'D', 'D']
 
     trainSets = NaiveBayes.trainDataSet(a, b)
+    print(np.array(trainSets[1][1]))
+    print([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] * np.array(trainSets[1][1]))
     a = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     b = [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]
     c = [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0]
