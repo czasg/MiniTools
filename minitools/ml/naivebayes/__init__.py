@@ -47,7 +47,7 @@ class NaiveBayes(Classification, SupervisedLearning):
         resData = None
         resLabel = None
         for trainSet in trainSets:
-            predict = np.sum(dataSet * np.array(trainSet[1])) + np.log(trainSet[2])
+            predict = np.array(trainSet[1]).dot(dataSet) + np.log(trainSet[2])
             if resData is None:
                 resData = predict
                 resLabel = trainSet[0]
@@ -68,8 +68,8 @@ if __name__ == '__main__':
     b = ['A', 'B', 'D', 'D']
 
     trainSets = NaiveBayes.trainDataSet(a, b)
-    print(np.array(trainSets[1][1]))
-    print([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] * np.array(trainSets[1][1]))
+    # print(np.array(trainSets[1][1]))
+    # print([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0] * np.array(trainSets[1][1]))
     a = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     b = [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]
     c = [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0]
