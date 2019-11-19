@@ -40,6 +40,7 @@ class NaiveBayes(Classification, SupervisedLearning):
         for index, trainSet in enumerate(trainSets):
             doc[trainSetLabels[index]][1] += trainSet
             doc[trainSetLabels[index]][2] += np.sum(trainSet)
+        # 类别标签 + 在某个类别下，每个特征元素出现的概率 + 唯一标签
         return [(key, list(np.log(value[1] / value[2])), value[0]) for key, value in doc.items()]
 
     @classmethod
@@ -47,6 +48,9 @@ class NaiveBayes(Classification, SupervisedLearning):
         resData = None
         resLabel = None
         for trainSet in trainSets:
+            # 乘法转化为加法：即log[p(x1|C)*p(x2|C)..] = log[p(x1|C)] + log[p(x2|C)] + ...
+            # 这里的每一个特征元素值，均表示该特征在此标签类别下出现的概率
+            # dataSet * trainSet[1] 表示将每个词与对应的概率相关联起来
             predict = np.array(trainSet[1]).dot(dataSet) + np.log(trainSet[2])
             if resData is None:
                 resData = predict
