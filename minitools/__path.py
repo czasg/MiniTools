@@ -1,14 +1,14 @@
 import os
 import time
 import shutil
-import weakref
-import collections
+
+from functools import wraps
 
 from .__logging import show_dynamic_ratio
 
 __all__ = ('get_current_path', 'to_path', 'current_file_path', 'path2module',
            'find_file_by_name', 'modify_file_content', 'delete_file_by_name',
-           'remove_file', 'remove_folder', 'rename_file')
+           'remove_file', 'remove_folder', 'rename_file', 'MiniCache')
 
 
 def get_current_path(file=__file__):
@@ -92,16 +92,16 @@ def modify_file_content(string, replace='', filename='', folder='', path='.'):
     print("modify count: {}".format(count))
 
 
-class MiniCache:  # todo， 参考scrapy的弱引用，应该可以学到不少
+class MiniCache:
     notFound = object()
+    instance_cache = None
 
     class Dict(dict):
         def __del__(self):
             pass
 
-    def __init__(self, maxLen=10):
-        self.weak = weakref.WeakValueDictionary()
-        self.strong = collections.deque(maxlen=maxLen)
+    def __init__(self):
+        self.weak = dict()  # todo, change this to weakref?
 
     @staticmethod
     def getNowTime():
@@ -109,14 +109,40 @@ class MiniCache:  # todo， 参考scrapy的弱引用，应该可以学到不少
 
     def get(self, key):
         temp = self.weak.copy()
-        for key, value in temp.items():
-            if self.getNowTime() > value[r'expire']:
-                self.weak.pop(key)
+        for di_key, di_value in temp.items():
+            if self.getNowTime() > di_value[r'expire']:
+                self.weak.pop(di_key)
         value = self.weak.get(key, self.notFound)
         if value is self.notFound or self.getNowTime() > value[r'expire']:
             return self.notFound
         return value
 
     def set(self, key, value):
-        self.weak[key] = strongRef = MiniCache.Dict(value)
-        self.strong.append(strongRef)
+        self.weak[key] = MiniCache.Dict(value)
+
+    def miniCache(self, expire=60 * 60 * 12):
+        def wrapper(func):
+            @wraps(func)
+            def _wrapper(*args, **kwargs):
+                key = self.get_keys(func, *args, **kwargs)
+                result = self.get(key)
+                if result is self.notFound:
+                    result = func(*args, **kwargs)
+                    self.set(key, {r'result': result, r'expire': expire + self.getNowTime()})
+                    return result
+                else:
+                    result = result[r'result']
+                    return result
+
+            return _wrapper
+
+        return wrapper
+
+    def get_keys(self, func, *args, **kwargs):
+        return func.__name__
+
+    @classmethod
+    def get_instance(cls):
+        if not cls.instance_cache:
+            cls.instance_cache = cls()
+        return cls.instance_cache
