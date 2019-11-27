@@ -1,3 +1,5 @@
-from .__threading import *
+from .__local import *
+from .__timeout import *
 
-__all__ = __threading.__all__
+__all__ = __local.__all__ + \
+          __timeout.__all__
