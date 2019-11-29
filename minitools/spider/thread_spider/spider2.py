@@ -13,6 +13,9 @@ from parsel import Selector
 from urllib.parse import urljoin
 from concurrent.futures import ThreadPoolExecutor, Future
 
+from minitools import HostFilter, UrlParser
+
+
 __all__ = ('Response', 'Request', 'Spider')
 
 _threads_queues = weakref.WeakKeyDictionary()
@@ -132,6 +135,7 @@ class Spider:
     coding = "utf-8"
     queue = queue.Queue()
     session = session()
+    delay = 0
     _max_thread = (os.cpu_count() or 1) * 5
     _counter = itertools.count().__next__
 
@@ -205,11 +209,26 @@ class Spider:
 
 
 if __name__ == '__main__':
-    class S(Spider):
-        url = "http://192.168.0.110:3031/"
+    hf = HostFilter("fanyi.youdao.com")
+    class MySpider(Spider):
+        url = "http://fanyi.youdao.com/"
+        # url = "http://www.czasg.xyz/"
 
-        def parse(self, response): ...
-        # print(response.text)
+        # def start_requests(self):
+        #     for _ in range(10):
+        #         yield Request(self)
+
+        def parse(self, response):
+            # print(response.text)
+            # print(response.url)
+            from pprint import pprint
+            # pprint(UrlParser.get_links(response.text))  # 0.007000446319580078
+
+            urls = UrlParser.get_href(response.text)
+            # pprint(urls)
+            urls = [response.urljoin(url) for url in urls]
+            pprint(urls)
+            pprint([url for url in urls if hf.allow(url)])  # 0.0009999275207519531
 
 
-    S.run()
+    MySpider.run()

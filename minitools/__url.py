@@ -29,6 +29,8 @@ class HostFilter:
 
 
 class UrlParser(HTMLParser):
+    ALL_HREF = re.compile('href="(.*?)"').findall
+
     def __init__(self):
         super(UrlParser, self).__init__()
         self.urls = set()
@@ -43,3 +45,11 @@ class UrlParser(HTMLParser):
         urlSeeker = cls()
         urlSeeker.feed(html)
         return [urljoin(source, url) for url in urlSeeker.urls] if source else urlSeeker.urls
+
+    @classmethod
+    def get_href(cls, html):
+        return [url for url in cls.ALL_HREF(html)
+                if not url.startswith((
+                "javascript",
+                "#",
+            ))]
