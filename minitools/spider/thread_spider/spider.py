@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 import queue
+import chardet
+import os
 
 from requests import session
 from parsel import Selector
@@ -13,7 +16,7 @@ default_headers = {
 running = 0
 
 """
-基于concurrent的ThreadPoolExecutor写的玩具
+鍩轰簬concurrent鐨凾hreadPoolExecutor鍐欑殑鐜╁叿
 """
 
 
@@ -48,9 +51,10 @@ class Request:
         global running
         running += 1
         self.set_session(self.spider.session)
-        text = self.session.request(self.method, self.url,
-                                    data=self.data, headers=self.headers,
-                                    params=self.params, json=self.json).text
+        content = self.session.request(self.method, self.url,
+                                       data=self.data, headers=self.headers,
+                                       params=self.params, json=self.json).content
+        text = content.decode(self.spider.coding or chardet.detect(content)['encoding'])
         func = (self.callback or self.spider.parse)(Response(text=text, url=self.url))
         running -= 1
         self.spider.add_request(None)
@@ -62,10 +66,14 @@ class Request:
 
 class Spider:
     url = ''
-
+    coding = 'utf-8'  # if set None, it will auto match the coding for bytes
     queue = queue.Queue()
     session = session()
-    executor = ThreadPoolExecutor(10)
+    executor = None
+    _max_thread = (os.cpu_count() or 1) * 5
+
+    def __init__(self):
+        self.executor = ThreadPoolExecutor(self._max_thread)
 
     def start_requests(self):
         yield Request(self)
