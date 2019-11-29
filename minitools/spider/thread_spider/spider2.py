@@ -1,20 +1,35 @@
+import os
 import queue
+import weakref
+import chardet
+import atexit
 
 from requests import session
 from parsel import Selector
 from urllib.parse import urljoin
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, Future
 
 __all__ = ('Response', 'Request', 'Spider')
 
+_threads_queues = weakref.WeakKeyDictionary()
+_shutdown = False
 default_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
 }
 running = 0
 
-"""
-基于concurrent的ThreadPoolExecutor写的玩具
-"""
+
+def _python_exit():
+    global _shutdown
+    _shutdown = True
+    items = iter(_threads_queues.items())
+    for t, q in items:
+        q.put(None)
+    for t, q in items:
+        t.join()
+
+
+atexit.register(_python_exit)
 
 
 class Response(Selector):
@@ -48,9 +63,10 @@ class Request:
         global running
         running += 1
         self.set_session(self.spider.session)
-        text = self.session.request(self.method, self.url,
-                                    data=self.data, headers=self.headers,
-                                    params=self.params, json=self.json).text
+        content = self.session.request(self.method, self.url,
+                                       data=self.data, headers=self.headers,
+                                       params=self.params, json=self.json).content
+        text = content.decode(self.spider.coding or chardet.detect(content)['encoding'])
         func = (self.callback or self.spider.parse)(Response(text=text, url=self.url))
         running -= 1
         self.spider.add_request(None)
@@ -63,9 +79,14 @@ class Request:
 class Spider:
     url = ''
 
+    coding = "utf-8"
     queue = queue.Queue()
     session = session()
-    executor = ThreadPoolExecutor(10)
+    _max_thread = (os.cpu_count() or 1) * 5
+    executor = None
+
+    def __init__(self):
+        self.executor = ThreadPoolExecutor(self._max_thread)
 
     def start_requests(self):
         yield Request(self)
