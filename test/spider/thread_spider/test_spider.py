@@ -2,8 +2,8 @@ from minitools.spider.thread_spider import *
 
 
 class MySpider(Spider):
-    url = 'http://credit.wuhu.gov.cn/whweb/xygs/detailValue?tableName=T_MOULD_PUNISH&coulmnId=f13e789609fb459fa9c5cdaf64d49cbd'
-
+    url = 'https://www.cnblogs.com/mswei/p/9835370.html'
+    coding = None
     def start_requests(self):
         yield Request(self)
 
