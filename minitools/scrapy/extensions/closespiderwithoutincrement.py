@@ -1,9 +1,9 @@
 from twisted.internet import task
 from scrapy import signals
 
-__all__ = 'close_spider_without_incfement',
+__all__ = 'close_spider_without_increment',
 
-close_spider_without_incfement = {
+close_spider_without_increment = {
     'EXTENSIONS': {
         'minitools.scrapy.extensions.closespiderwithoutincrement.CloseSpiderWithoutIncrement': 0
     }
