@@ -1,4 +1,4 @@
-__all__ = 'get_proxy'
+__all__ = 'get_proxy',
 
 
 def get_proxy():

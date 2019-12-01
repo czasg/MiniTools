@@ -1,4 +1,5 @@
 from minitools.scrapy import miniSpider
+from minitools.scrapy.downloadermiddlewares import PROXY_RETRY_MIDDLEWARE
 from scrapy import Request
 
 
@@ -13,14 +14,16 @@ class MySpider(miniSpider):
         # print(response.headers['Set-Cookie'])
         print(response.url)
         # yield response.request.replace(callback=self.parse1, dont_filter=True)
-
-    def parse1(self, response):
-        print(response.text)
+        # yield Request('http://www.czczczczczczc.com')
 
     # @classmethod
     # def check_logger_files(cls):
     #     return super().check_logger_files(expires=1)
 
+    @classmethod
+    def update_settings(cls, settings):
+        settings.setdict(PROXY_RETRY_MIDDLEWARE, priority='spider')
+
 
 if __name__ == '__main__':
-    MySpider.run(__file__, check_logger_files=True)
+    MySpider.run(__file__)
