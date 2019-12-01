@@ -9,7 +9,8 @@ from .__logging import show_dynamic_ratio
 
 __all__ = ('get_current_path', 'to_path', 'current_file_path', 'path2module',
            'find_file_by_name', 'modify_file_content', 'delete_file_by_name',
-           'remove_file', 'remove_folder', 'rename_file', 'MiniCache')
+           'remove_file', 'remove_folder', 'rename_file', 'MiniCache',
+           'check_logger_files')
 
 
 def get_current_path(file=__file__):
@@ -91,6 +92,16 @@ def modify_file_content(string, replace='', filename='', folder='', path='.'):
     print("{} -> {}".format(string, replace))
     print("file count: {}".format(len(files)))
     print("modify count: {}".format(count))
+
+def check_logger_files(name, path='.', spl='._', expires=60*60*24*3):
+    LOGFER_FILE_SPLIT = re.compile(f'[{spl}]').split
+    for currentPath, folders, files in os.walk(path):
+        for file in files:
+            if file.startswith(name):
+                logName, logTime = LOGFER_FILE_SPLIT(file)[:2]
+                if (int(time.time()) - int(logTime)) > expires:
+                    remove_file(to_path(currentPath, file))
+        break
 
 
 class MiniCache:

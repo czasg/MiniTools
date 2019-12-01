@@ -17,6 +17,10 @@ class MySpider(miniSpider):
     def parse1(self, response):
         print(response.text)
 
+    # @classmethod
+    # def check_logger_files(cls):
+    #     return super().check_logger_files(expires=1)
+
 
 if __name__ == '__main__':
-    MySpider.run(__file__)
+    MySpider.run(__file__, check_logger_files=True)
