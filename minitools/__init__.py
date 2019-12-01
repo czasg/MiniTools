@@ -1,6 +1,7 @@
 __author__ = 'CzaOrz <https://github.com/CzaOrz>'
 from .version import __version__
 
+from .__base64 import *
 from .__datetime import *
 from .__dict import *
 from .__email import *
@@ -10,7 +11,8 @@ from .__path import *
 from .__url import *
 from .__utils import *
 
-__all__ = (__datetime.__all__ +
+__all__ = (__base64.__all__ +
+           __datetime.__all__ +
            __dict.__all__ +
            __email.__all__ +
            __hashlib.__all__ +
