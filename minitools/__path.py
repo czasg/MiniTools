@@ -25,7 +25,7 @@ def current_file_path(filename, filepath):
 
 
 def path2module(path):
-    return '.'.join(filter(lambda x: x, re.split(r'[/\\]', path))).replace('.py', '')
+    return '.'.join(filter(lambda x: x, re.split(r'[/\\]|\.py', path)))
 
 
 def remove_file(filePath):
