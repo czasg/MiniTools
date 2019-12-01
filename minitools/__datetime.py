@@ -3,7 +3,7 @@ import calendar
 
 from datetime import datetime, timedelta
 
-__all__ = ('to_datetime', 'str2datetime', 'timekiller')
+__all__ = ('to_datetime', 'timekiller')
 
 RE_SEARCH_D4_D2 = re.compile("(\d{4})[^\d]*(\d{2})[^\d]*(\d{0,2})[^\d]*(\d{0,2})[^\d]*(\d{0,2})[^\d]*(\d{0,2})").search
 
