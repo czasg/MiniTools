@@ -8,6 +8,7 @@ from .__hashlib import *
 from .__logging import *
 from .__path import *
 from .__url import *
+from .__utils import *
 
 __all__ = (__datetime.__all__ +
            __dict.__all__ +
@@ -15,4 +16,5 @@ __all__ = (__datetime.__all__ +
            __hashlib.__all__ +
            __logging.__all__ +
            __path.__all__ +
-           __url.__all__)
+           __url.__all__ +
+           __utils.__all__)

@@ -25,7 +25,6 @@ class SingleSpiderLoader(object):
         self.settings = settings
         self.scrapy_module_path = os.path.dirname(closest_scrapy_cfg())
         self.spider_modules = settings.getlist('SPIDER_MODULES')
-        self.spider_modules_path = settings.get('SPIDER_MODULES_PATH')
 
     @classmethod
     def from_settings(cls, settings):
