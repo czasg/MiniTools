@@ -2,7 +2,7 @@ from minitools.scrapy import miniSpider, from_xpath, xt, next_page_request
 
 
 class MySpider(miniSpider):
-    name = "test_spider"
+    name = "test_tools"
     start_urls = ["https://q.cnblogs.com/list/unsolved?page=1"]
 
     def parse(self, response):
