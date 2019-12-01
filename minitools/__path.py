@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import shutil
 
@@ -24,7 +25,7 @@ def current_file_path(filename, filepath):
 
 
 def path2module(path):
-    return '.'.join(path.split(os.sep))
+    return '.'.join(filter(lambda x: x, re.split(r'[/\\]', path))).replace('.py', '')
 
 
 def remove_file(filePath):

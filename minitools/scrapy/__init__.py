@@ -12,7 +12,7 @@ class miniSpider(scrapy.Spider):
     name = "minitools"
 
     @classmethod
-    def run(cls, spiderName=None, suffix=""):
+    def run(cls, spiderName=None, suffix="", single=True):
         """
         >>> from minitools.scrapy import miniSpider
         >>> class MySpider(miniSpider):
@@ -24,5 +24,6 @@ class miniSpider(scrapy.Spider):
         :param suffix: you can add some config if need
         :return:
         """
-        suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader"
+        if single:
+            suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader"
         subprocess.call(f'scrapy crawl {spiderName or cls.name} {suffix}', shell=True)

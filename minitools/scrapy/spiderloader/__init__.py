@@ -25,6 +25,7 @@ class SingleSpiderLoader(object):
         self.settings = settings
         self.scrapy_module_path = os.path.dirname(closest_scrapy_cfg())
         self.spider_modules = settings.getlist('SPIDER_MODULES')
+        self.spider_modules_path = settings.get('SPIDER_MODULES_PATH')
 
     @classmethod
     def from_settings(cls, settings):
@@ -34,15 +35,15 @@ class SingleSpiderLoader(object):
         if os.path.exists(spider_name):
             spider_path = self._get_spider_path(spider_name)
             spider_module = import_module(spider_path)
-            for spider_cls in iter_spider_classes(spider_module):
-                return spider_cls  # return the first spider module
+            spider = self._load_spider(spider_module, spider_name)
+            if spider:
+                return spider
         else:
             for name in self.spider_modules:
                 for module in walk_modules(name):
-                    for spider_cls in iter_spider_classes(module):
-                        # print(spider_cls)
-                        if spider_cls.name == spider_name:
-                            return spider_cls
+                    spider = self._load_spider(module, spider_name)
+                    if spider:
+                        return spider
             raise RuntimeError(f"Spider not found: {spider_name}")
         raise RuntimeError(f"{spider_module} hasn't Spider Module")
 
@@ -51,6 +52,13 @@ class SingleSpiderLoader(object):
 
     def list(self):
         return []
+
+    def _load_spider(self, spider_path, spider_name=''):
+        for spider_cls in iter_spider_classes(spider_path):
+            if spider_name and spider_cls.name == spider_name:
+                return spider_cls
+            else:
+                return spider_cls  # return the first spider module
 
     def _get_spider_path(self, spider_name):
         spider_path = re.search(
