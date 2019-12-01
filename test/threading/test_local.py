@@ -1,6 +1,6 @@
 import threading
 
-from minitools.threading import minilocal
+from minitools.threading_ import minilocal
 
 from threading import current_thread
 
