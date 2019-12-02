@@ -11,6 +11,8 @@ __all__ = (__pager.__all__ +
 class miniSpider(scrapy.Spider):
     name = "minitools"
 
+    mini_proxy = None
+
     @classmethod
     def run(cls, spiderName=None, suffix="", single=True, check_logger_files=False):
         """
