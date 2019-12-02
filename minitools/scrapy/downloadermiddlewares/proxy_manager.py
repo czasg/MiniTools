@@ -28,6 +28,6 @@ class ProxyRetryMiddleware(RetryMiddleware):
     def _retry(self, request, reason, spider):
         req = super()._retry(request, reason, spider)
         if req:
-            proxy = self.get_proxy()
+            proxy = self.get_proxy()  # todo, Each Request will receive one proxy. it's terrible!
             spider.log(f"请求异常, 获取到新代理proxy: {proxy}, 进入重试", level=logging.INFO)
             return req.replace(meta={'proxy': f"http://{proxy}"}) if proxy else req
