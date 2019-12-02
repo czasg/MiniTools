@@ -86,7 +86,7 @@ class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
                     return request_replace_proxy_meta(request, proxy)
                 except ValueError:  # not find the proxy.
                     return request_replace_proxy_meta(request, self.proxies[0])
-                except IndexError:  # ProxyAgent poll is exhaustion. push new one in.
+                except IndexError:  # ProxyAgent pool is exhaustion. push new one in it.
                     _push_proxy()
                     return _suitable_proxy_request(request)
 
