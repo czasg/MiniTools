@@ -36,9 +36,10 @@ class miniSpider(scrapy.Spider):
 
     @classmethod
     def check_logger_files(cls, *args, **kwargs):
+        from os import environ
         from minitools import check_logger_files
         from scrapy.utils.project import get_project_settings
         LOG_FILE_PATH = get_project_settings().get('LOG_FILE_PATH')
-        assert LOG_FILE_PATH, "LOG_FILE_PATH not define"
+        environ.pop('SCRAPY_SETTINGS_MODULE')
         check_logger_files(cls.name, LOG_FILE_PATH, *args, **kwargs)
         return LOG_FILE_PATH

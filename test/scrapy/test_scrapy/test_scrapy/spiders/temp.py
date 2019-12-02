@@ -26,4 +26,4 @@ class MySpider(miniSpider):
 
 
 if __name__ == '__main__':
-    MySpider.run(__file__)
+    MySpider.run(__file__, check_logger_files=True)
