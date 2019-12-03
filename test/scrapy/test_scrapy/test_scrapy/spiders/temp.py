@@ -13,8 +13,10 @@ class MySpider(miniSpider):
     def parse(self, response):
         # response = refresh_encoding(response)
         # print(response.text)
-        response.replace(encoding='gb2312')
+        response.replace(encoding='utf-8')
         print(response.encoding)
+        print(response.text)
+
 
 
 if __name__ == '__main__':
