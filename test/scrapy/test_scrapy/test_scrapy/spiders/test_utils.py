@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from minitools.scrapy import miniSpider, refresh_encoding
+from minitools.scrapy import miniSpider, refresh_response
 from scrapy import Request
 
 
@@ -11,12 +11,9 @@ class MySpider(miniSpider):
             yield Request(url)  # ISO-8859-1 gb2312
 
     def parse(self, response):
-        # response = refresh_encoding(response)
-        # print(response.text)
-        response.replace(encoding='utf-8')
-        print(response.encoding)
-        print(response.text)
-
+        response = response.replace(encoding='gb2312')
+        response = refresh_response(response, encoding='gb2312')
+        print(response.url)
 
 
 if __name__ == '__main__':
