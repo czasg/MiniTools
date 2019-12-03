@@ -2,9 +2,11 @@ import scrapy
 import subprocess
 
 from .__pager import *
+from .__utils import *
 from .__xpather import *
 
 __all__ = (__pager.__all__ +
+           __utils.__all__ +
            __xpather.__all__)
 
 
