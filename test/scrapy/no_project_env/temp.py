@@ -17,3 +17,4 @@ if __name__ == '__main__':
     # subprocess.call(f"scrapy runspider {__file__}")
 
     # todo, scrapy crawl -o cza.json.  can i use this way to save data without pipeline?
+    # todo, 付费代理还需要加入统计机制，也就是统计删除的意思
