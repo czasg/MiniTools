@@ -15,3 +15,5 @@ if __name__ == '__main__':
     # import subprocess
     #
     # subprocess.call(f"scrapy runspider {__file__}")
+
+    # todo, scrapy crawl -o cza.json.  can i use this way to save data without pipeline?
