@@ -28,16 +28,20 @@ class miniSpider(scrapy.Spider):
         :param suffix: you can add some config if need
         :return:
         """
+        command = "crawl"
         if check_logger_files:
             from time import time
             from minitools import to_path
             LOG_FILE_PATH = cls.check_logger_files()
             logFileName = f"{cls.name}_{int(time())}.log"
             suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "
+
         if single:
-            suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader "
-        # todo, what's mean of runSpider
-        subprocess.call(f'scrapy runspider {spiderName or cls.name} {suffix}', shell=True)
+            command = "runspider"
+        else:
+            spiderName = cls.name
+
+        subprocess.call(f'scrapy {command} {spiderName} {suffix}', shell=True)
 
     @classmethod
     def check_logger_files(cls, *args, **kwargs):
