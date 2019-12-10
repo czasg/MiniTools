@@ -16,7 +16,12 @@ class miniSpider(scrapy.Spider):
     mini_proxy = None
 
     @classmethod
-    def run(cls, spiderName=None, suffix="", single=True, check_logger_files=False):
+    def run(cls,
+            spiderName=None,
+            suffix="",
+            single=True,
+            save=False,
+            check_logger_files=False):
         """
         >>> from minitools.scrapy import miniSpider
         >>> class MySpider(miniSpider):
@@ -29,12 +34,6 @@ class miniSpider(scrapy.Spider):
         :return:
         """
         command = "crawl"
-        if check_logger_files:
-            from time import time
-            from minitools import to_path
-            LOG_FILE_PATH = cls.check_logger_files()
-            logFileName = f"{cls.name}_{int(time())}.log"
-            suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "
 
         if single:
             command = "runspider"
@@ -42,6 +41,19 @@ class miniSpider(scrapy.Spider):
             suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader "
         else:
             spiderName = cls.name
+
+        if save:
+            if save is True:  # default, we use json to save
+                suffix += f" -o {cls.name}.json -s FEED_EXPORT_ENCODING=utf-8 "
+            else:
+                suffix += f" -o {save} -s FEED_EXPORT_ENCODING=utf-8 "
+
+        if check_logger_files:
+            from time import time
+            from minitools import to_path
+            LOG_FILE_PATH = cls.check_logger_files()
+            logFileName = f"{cls.name}_{int(time())}.log"
+            suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "
 
         subprocess.call(f'scrapy {command} {spiderName} {suffix}', shell=True)
 
