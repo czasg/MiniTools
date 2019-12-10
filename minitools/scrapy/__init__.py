@@ -36,7 +36,8 @@ class miniSpider(scrapy.Spider):
             suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "
         if single:
             suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader "
-        subprocess.call(f'scrapy crawl {spiderName or cls.name} {suffix}', shell=True)
+        # todo, what's mean of runSpider
+        subprocess.call(f'scrapy runspider {spiderName or cls.name} {suffix}', shell=True)
 
     @classmethod
     def check_logger_files(cls, *args, **kwargs):
