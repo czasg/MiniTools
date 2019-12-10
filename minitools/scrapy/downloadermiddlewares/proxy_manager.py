@@ -1,7 +1,6 @@
 import logging
-
+from collections import defaultdict
 from minitools import get_proxy, merge_dict, check_proxy
-
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.exceptions import NotConfigured
 
@@ -70,6 +69,10 @@ class ProxyRetryMiddleware(BaseProxyRetryMiddleware):
 
 class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
 
+    def __init__(self, settings, get_proxy):
+        super(ProxyPoolRetryMiddleware, self).__init__(settings, get_proxy)
+        self.error_stats = defaultdict(int)
+
     def _retry(self, request, reason, spider):
         req = super()._retry(request, reason, spider)
         stats = spider.crawler.stats
@@ -79,7 +82,12 @@ class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
                     _push_proxy()
                 try:
                     if 'proxy' in request.meta:
-                        proxy = self.proxies[self.proxies.index(request.meta['proxy']) + 1]
+                        index = self.proxies.index(request.meta['proxy'])
+                        proxy = self.proxies[index + 1]
+                        pre_error_proxy = self.proxies[index]
+                        self.error_stats[pre_error_proxy] += 1
+                        if self.error_stats[pre_error_proxy] == 3:
+                            self.proxies.remove(pre_error_proxy)
                     else:
                         proxy = self.proxies[0]
                     spider.log(f"new {proxy} from proxy-ip-pool for {request.url}", level=logging.INFO)
