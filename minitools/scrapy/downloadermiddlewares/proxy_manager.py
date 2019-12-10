@@ -1,6 +1,6 @@
 import logging
 
-from minitools import get_proxy, merge_dict
+from minitools import get_proxy, merge_dict, check_proxy
 
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.exceptions import NotConfigured
@@ -126,10 +126,6 @@ class FixedProxyMiddleware:
         if retry_times and proxy:
             self.mini_proxy = proxy  # save the good quality proxy.
         return response
-
-
-def check_proxy(proxy):
-    return proxy if proxy.startswith('http') else f"http://{proxy}"
 
 
 def request_replace_proxy_meta(request, proxy):
