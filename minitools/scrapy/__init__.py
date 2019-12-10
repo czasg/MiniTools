@@ -20,7 +20,7 @@ class miniSpider(scrapy.Spider):
         """
         >>> from minitools.scrapy import miniSpider
         >>> class MySpider(miniSpider):
-        >>>     name = "fastSpider_or_other"
+        >>>     name = "spider name isn't strong correlation"
         >>>     ...
         >>> MySpider.run(__file__)
         Use MySpider.run(__file__), so you can load spider faster.
@@ -38,6 +38,8 @@ class miniSpider(scrapy.Spider):
 
         if single:
             command = "runspider"
+            # By command of runspider, this `SPIDER_LOADER_CLASS` maybe no mean.
+            suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader "
         else:
             spiderName = cls.name
 
