@@ -36,6 +36,7 @@ class miniSpider(scrapy.Spider):
         command = "crawl"
 
         if single:
+            assert spiderName, "You may should run(single=False)"
             command = "runspider"
             # By command of runspider, this `SPIDER_LOADER_CLASS` maybe no mean.
             suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader "
