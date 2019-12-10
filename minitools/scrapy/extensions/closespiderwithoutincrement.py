@@ -5,8 +5,9 @@ __all__ = 'close_spider_without_increment',
 
 close_spider_without_increment = {
     'EXTENSIONS': {
-        'minitools.scrapy.extensions.closespiderwithoutincrement.CloseSpiderWithoutIncrement': 0
-    }
+        'minitools.scrapy.extensions.closespiderwithoutincrement.CloseSpiderWithoutIncrement': 0,
+    },
+    'CLOSESPIDER_CHECKINTERVAL': 33,
 }
 
 
