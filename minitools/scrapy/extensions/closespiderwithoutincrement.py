@@ -3,6 +3,7 @@ from scrapy import signals
 
 __all__ = 'close_spider_without_increment',
 
+# you must set increment/count in `spider.stat` if this is any item output.
 close_spider_without_increment = {
     'EXTENSIONS': {
         'minitools.scrapy.extensions.closespiderwithoutincrement.CloseSpiderWithoutIncrement': 0,
