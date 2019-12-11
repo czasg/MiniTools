@@ -81,4 +81,4 @@ class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
 def request_replace_proxy_meta(request, proxy):
     meta = request.meta
     meta['proxy'] = proxy
-    return request.replace(meta=meta, dont_filter=True)
+    return request.replace(meta=meta, priority=1, dont_filter=True)
