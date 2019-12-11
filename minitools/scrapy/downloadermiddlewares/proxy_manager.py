@@ -2,41 +2,18 @@ import logging
 from collections import defaultdict
 from minitools import get_proxy, merge_dict, check_proxy
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
-from scrapy.exceptions import NotConfigured
 
-__all__ = ('PROXY_RETRY_MIDDLEWARE', 'PROXY_POOL_RETRY_MIDDLEWARE', 'FIXED_PROXY_MIDDLEWARE',
-           'FIXED_PROXY_RETRY_MIDDLEWARE', 'FIXED_PROXY_POOL_RETRY_MIDDLEWARE')
-
-# when one Request fail and retry, it will random.choice one proxy-ip for the new Request
-# each retries, the proxy-ip maybe different for Request
-PROXY_RETRY_MIDDLEWARE = {
-    'DOWNLOADER_MIDDLEWARES': {
-        'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
-        'minitools.scrapy.downloadermiddlewares.proxy_manager.ProxyRetryMiddleware': 550,
-    }
-}
+__all__ = 'PROXY_POOL_RETRY_MIDDLEWARE',
 
 # when one Request fail and retry, it will random.choice one proxy-ip into a proxy-ip-pool
-# each retries, every Retry-Request will choose first proxy in proxy-ip-pool
-# and the second retry in same Request, it will choose next proxy in proxy-ip-pool
+# each retries, every Retry-Request will choose latest proxy in proxy-ip-pool
 PROXY_POOL_RETRY_MIDDLEWARE = {
     'DOWNLOADER_MIDDLEWARES': {
         'scrapy.downloadermiddlewares.retry.RetryMiddleware': None,
+        'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
         'minitools.scrapy.downloadermiddlewares.proxy_manager.ProxyPoolRetryMiddleware': 550,
     }
 }
-
-# This proxy from ProxyMiddleware will just works once for a new Request which hasn't `proxy`,
-# if you need change it, you should use ProxyRetryMiddleware/ProxyPoolRetryMiddleware.
-FIXED_PROXY_MIDDLEWARE = {
-    'DOWNLOADER_MIDDLEWARES': {
-        'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
-        'minitools.scrapy.downloadermiddlewares.proxy_manager.FixedProxyMiddleware': 50,
-    }
-}
-
-FIXED_PROXY_RETRY_MIDDLEWARE = merge_dict(FIXED_PROXY_MIDDLEWARE, PROXY_RETRY_MIDDLEWARE)
-FIXED_PROXY_POOL_RETRY_MIDDLEWARE = merge_dict(FIXED_PROXY_MIDDLEWARE, PROXY_POOL_RETRY_MIDDLEWARE)
 
 
 class BaseProxyRetryMiddleware(RetryMiddleware):
@@ -52,26 +29,21 @@ class BaseProxyRetryMiddleware(RetryMiddleware):
         self.proxies = []
 
 
-class ProxyRetryMiddleware(BaseProxyRetryMiddleware):
-
-    def _retry(self, request, reason, spider):
-        req = super()._retry(request, reason, spider)
-        stats = spider.crawler.stats
-        if req:
-            proxy = self.get_proxy()
-            if proxy:
-                stats.inc_value('mini/proxy/count')
-                proxy = check_proxy(proxy)
-                spider.log(f"get one new proxy: {proxy} for {request.url}", level=logging.INFO)
-                return request_replace_proxy_meta(req, proxy)
-            return req
-
-
 class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
 
     def __init__(self, settings, get_proxy):
         super(ProxyPoolRetryMiddleware, self).__init__(settings, get_proxy)
         self.error_stats = defaultdict(int)
+
+    def process_request(self, request, spider):
+        if self.proxies:
+            spider.log("use latest proxies...")  # log level: debug
+            request.meta["proxy"] = self.proxies[-1]
+        else:
+            mini_proxy = getattr(spider, "mini_proxy")  # log level: debug
+            if mini_proxy:
+                spider.log("use mini_proxy...")
+                request.meta["proxy"] = mini_proxy
 
     def _retry(self, request, reason, spider):
         req = super()._retry(request, reason, spider)
@@ -104,36 +76,6 @@ class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
                 spider.log(f"add new proxy-ip, current pool: {self.proxies}", level=logging.INFO)
 
             return _suitable_proxy_request(req)
-
-
-class FixedProxyMiddleware:
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        if not crawler.settings.getbool('HTTPPROXY_ENABLED'):
-            raise NotConfigured
-        return cls(crawler)
-
-    def __init__(self, crawler):
-        if not hasattr(crawler.spider, 'mini_proxy'):
-            raise AttributeError("ProxyMiddleware need a property of `mini_proxy`")
-        self.mini_proxy_log = True
-
-    def process_request(self, request, spider):
-        mini_proxy = spider.mini_proxy
-        if mini_proxy and self.mini_proxy_log:
-            self.mini_proxy = mini_proxy
-            self.mini_proxy_log = False
-            spider.log(f"using proxy:ip --- {self.mini_proxy}", level=logging.INFO)
-        if mini_proxy and 'proxy' not in request.meta:  # ignore if proxy is already set
-            request.meta['proxy'] = check_proxy(self.mini_proxy)
-
-    def process_response(self, request, response, spider):
-        retry_times = request.meta.get('retry_times', 0)
-        proxy = request.meta.get('proxy', None)
-        if retry_times and proxy:
-            self.mini_proxy = proxy  # save the good quality proxy.
-        return response
 
 
 def request_replace_proxy_meta(request, proxy):
