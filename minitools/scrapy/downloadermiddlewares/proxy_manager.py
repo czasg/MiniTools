@@ -89,7 +89,7 @@ class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
                         if self.error_stats[pre_error_proxy] == 3:
                             self.proxies.remove(pre_error_proxy)
                     else:
-                        proxy = self.proxies[0]
+                        proxy = self.proxies[-1]
                     spider.log(f"new {proxy} from proxy-ip-pool for {request.url}", level=logging.INFO)
                     return request_replace_proxy_meta(request, proxy)
                 except ValueError:  # not find the proxy.
