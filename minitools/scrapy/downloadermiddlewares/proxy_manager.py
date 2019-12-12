@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from minitools import get_proxy, merge_dict, check_proxy
+from minitools import get_proxy, check_proxy
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
 
 __all__ = 'PROXY_POOL_RETRY_MIDDLEWARE',
