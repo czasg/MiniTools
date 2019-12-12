@@ -1,6 +1,10 @@
 import scrapy
 import subprocess
 
+from time import time
+from minitools import to_path
+from minitools import check_logger_files
+
 from .__pager import *
 from .__utils import *
 from .__xpather import *
@@ -21,7 +25,7 @@ class miniSpider(scrapy.Spider):
             suffix="",
             single=True,
             save=False,
-            check_logger_files=False):
+            log_path=None):
         """
         >>> from minitools.scrapy import miniSpider
         >>> class MySpider(miniSpider):
@@ -33,7 +37,7 @@ class miniSpider(scrapy.Spider):
         :param suffix: you can add some config if need
         :param single: run just one spider rather scanning all spider in project
         :param save: save item as json by `FEED_URI`
-        :param check_logger_files:
+        :param log_path: path tp save logger file
         :return:
         """
         command = "crawl"
@@ -52,11 +56,13 @@ class miniSpider(scrapy.Spider):
             else:
                 suffix += f" -o {save} -s FEED_EXPORT_ENCODING=utf-8 "
 
-        if check_logger_files:
-            from time import time
-            from minitools import to_path
-            # LOG_FILE_PATH = cls.check_logger_files()
-            # logFileName = f"{cls.name}_{int(time())}.log"
-            # suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "  # todo, this is stupid
+        if log_path:
+            cls.clear_logger_files(log_path)
+            logFileName = f"{cls.name}_{int(time())}.log"
+            suffix += f" -s LOG_FILE={to_path(log_path, logFileName)} "
 
         subprocess.call(f'scrapy {command} {spiderName} {suffix}', shell=True)
+
+    @classmethod
+    def clear_logger_files(cls, log_path, *args, **kwargs):
+        check_logger_files(cls.name, log_path, *args, **kwargs)
