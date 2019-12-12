@@ -1,9 +1,8 @@
 import scrapy
-import subprocess
 
 from time import time
-from minitools import to_path
-from minitools import check_logger_files
+from scrapy.cmdline import execute
+from minitools import to_path, check_logger_files
 
 from .__pager import *
 from .__utils import *
@@ -61,7 +60,8 @@ class miniSpider(scrapy.Spider):
             logFileName = f"{cls.name}_{int(time())}.log"
             suffix += f" -s LOG_FILE={to_path(log_path, logFileName)} "
 
-        subprocess.call(f'scrapy {command} {spiderName} {suffix}', shell=True)
+        sys_command = f'scrapy {command} {spiderName} {suffix}'
+        execute(argv=sys_command.split())
 
     @classmethod
     def clear_logger_files(cls, log_path, *args, **kwargs):
