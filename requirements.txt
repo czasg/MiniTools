@@ -5,8 +5,9 @@ PyGithub>=1.44.1
 parsel>=1.5.0
 pillow>=6.0.0
 pymongo>=3.9.0
+PyExecJS
 requests>=2.20.0
-scrapy>=1.8.0
+scrapy>=1.6.0
 selenium>=3.141.0
 xlrd>=1.2.0
 xlutils>=2.0.0
