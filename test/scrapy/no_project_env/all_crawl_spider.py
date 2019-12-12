@@ -31,4 +31,4 @@ class MySpider(miniSpider, CrawlSpider):
 
 
 if __name__ == '__main__':
-    MySpider.run(__file__, suffix="-o all.json -s FEED_EXPORT_ENCODING=utf-8")
+    MySpider.run(__file__, save=True)

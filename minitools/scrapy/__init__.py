@@ -31,6 +31,9 @@ class miniSpider(scrapy.Spider):
         Use MySpider.run(__file__), so you can load spider faster.
         :param spiderName: general means `__file__`
         :param suffix: you can add some config if need
+        :param single: run just one spider rather scanning all spider in project
+        :param save: save item as json by `FEED_URI`
+        :param check_logger_files:
         :return:
         """
         command = "crawl"
@@ -38,7 +41,7 @@ class miniSpider(scrapy.Spider):
         if single:
             assert spiderName, "You may should run(single=False)"
             command = "runspider"
-            # By command of runspider, this `SPIDER_LOADER_CLASS` maybe no mean.
+            # By command of `runspider`, this `SPIDER_LOADER_CLASS` may not make any sense.
             suffix += " -s SPIDER_LOADER_CLASS=minitools.scrapy.spiderloader.SingleSpiderLoader "
         else:
             spiderName = cls.name
@@ -52,18 +55,8 @@ class miniSpider(scrapy.Spider):
         if check_logger_files:
             from time import time
             from minitools import to_path
-            LOG_FILE_PATH = cls.check_logger_files()
-            logFileName = f"{cls.name}_{int(time())}.log"
-            suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "
+            # LOG_FILE_PATH = cls.check_logger_files()
+            # logFileName = f"{cls.name}_{int(time())}.log"
+            # suffix += f" -s LOG_FILE={to_path(LOG_FILE_PATH, logFileName)} "  # todo, this is stupid
 
         subprocess.call(f'scrapy {command} {spiderName} {suffix}', shell=True)
-
-    @classmethod
-    def check_logger_files(cls, *args, **kwargs):
-        from os import environ
-        from minitools import check_logger_files
-        from scrapy.utils.project import get_project_settings
-        LOG_FILE_PATH = get_project_settings().get('LOG_FILE_PATH')
-        environ.pop('SCRAPY_SETTINGS_MODULE')
-        check_logger_files(cls.name, LOG_FILE_PATH, *args, **kwargs)
-        return LOG_FILE_PATH
