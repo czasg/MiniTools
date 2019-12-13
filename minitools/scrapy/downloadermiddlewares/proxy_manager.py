@@ -43,7 +43,7 @@ class ProxyPoolRetryMiddleware(BaseProxyRetryMiddleware):
             mini_proxy = getattr(spider, "mini_proxy")  # log level: debug
             if mini_proxy:
                 spider.log("use mini_proxy...")
-                request.meta["proxy"] = mini_proxy
+                request.meta["proxy"] = check_proxy(mini_proxy)
 
     def _retry(self, request, reason, spider):
         req = super()._retry(request, reason, spider)
