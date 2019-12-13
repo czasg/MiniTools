@@ -6,6 +6,7 @@ parsel>=1.5.0
 pillow>=6.0.0
 pymongo>=3.9.0
 PyExecJS
+redis
 requests>=2.20.0
 scrapy>=1.6.0
 selenium>=3.141.0
