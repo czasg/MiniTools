@@ -30,3 +30,26 @@ if __name__ == '__main__':
     import os
 
     MySpider.run(__file__, suffix=f"-s JOBDIR={os.path.dirname(__file__)}")
+
+    # import struct
+    # import os
+    # SIZE_FORMAT = ">L"
+    # SIZE_SIZE = struct.calcsize(SIZE_FORMAT)
+    # with open("cza.txt", 'rb') as f:
+    #     f.seek(-SIZE_SIZE, os.SEEK_END)
+    #     size, = struct.unpack(SIZE_FORMAT, f.read())
+    #     f.seek(-size-SIZE_SIZE, os.SEEK_END)
+    #     data = f.read(size)
+    #     print(data)
+
+    # for string in [
+    #     b'aaaaaaaaaaaaaaaaaaaaa',
+    #     b'bbbbbbbbbbbbbbbbbbbbb',
+    #     b'ccccccccccccccccccccc',
+    #     b'ddddddddddddddddddddd',
+    #     b'fffffffffffffffffffff',
+    #     b'ggggggggggggggggggggg',
+    # ]:
+    #     f.write(string)
+    #     ssize = struct.pack(SIZE_FORMAT, len(string))
+    #     f.write(ssize)
