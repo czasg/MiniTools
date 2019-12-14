@@ -1,11 +1,14 @@
+import re
 import numpy as np
 
 from io import BytesIO
 from PIL import Image
+from functools import partial
 
+from minitools import current_file_path
 from minitools.ml.knn import KNearestNeighbor
 
-__all__ = 'Ziru',
+__all__ = 'Ziru', 'ziru',
 
 
 class Ziru(KNearestNeighbor):
@@ -23,7 +26,7 @@ class Ziru(KNearestNeighbor):
 
     def loadTrainingSet(self, trainPath):
         if trainPath:
-            self.labels = list(trainPath[:trainPath.find('.')])
+            self.labels = list(re.search(r'(\d+)\.[^\/]+$', trainPath).group(1))
             self.trainSet = np.loadtxt(trainPath)
 
     def process(self, body: bytes):
@@ -58,11 +61,4 @@ class Ziru(KNearestNeighbor):
         return [self.classify0(r) for r in self.process(body)]
 
 
-"""
-Ziru.createTrainingSet("4983571602.png")
-
-zr = Ziru("4983571602.txt")
-
-with open("4978123605.png", 'rb') as f:
-    print(zr.get_price(f.read()))
-"""
+ziru = partial(Ziru, current_file_path("4983571602.txt", __file__))
