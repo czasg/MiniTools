@@ -32,6 +32,8 @@ class MongodbPipeline:
         self.not_log_detail = crawler.settings.getbool("mongodb_not_log_detail", True)
         self.mongodb_client = get_mongodb_client(**kwargs)
         self.mongodb = self.mongodb_client[mongodb_db][mongodb_coll]
+        crawler.spider.mongodb_client = self.mongodb_client
+        crawler.spider.mongodb = self.mongodb
 
     def process_item(self, item, spider):
         try:
