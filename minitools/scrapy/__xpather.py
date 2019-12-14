@@ -56,8 +56,8 @@ func_map = {
 }
 
 
-def from_xpath(response, xpath, type=xt.single, **kwargs):
-    if isinstance(xpath, list):
+def from_xpath(response, xpath, type=None, **kwargs):
+    if isinstance(xpath, list):  # todo, drop this func
         assert len(xpath) > 1, 'i think you should use xpath without list'
         zero, xpath[:] = xpath[0], xpath[1:]
         response_handler = response.xpath(zero)
@@ -77,4 +77,4 @@ def from_xpath(response, xpath, type=xt.single, **kwargs):
             results.append(result[0] if len(result) == 1 else result) if result else None
         return len(response_handler), len(results), results
     else:
-        return func_map[type](response, xpath, **kwargs)
+        return func_map[type or xt.single](response, xpath, **kwargs)
