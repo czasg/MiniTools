@@ -2,7 +2,11 @@ import re
 import random
 import requests
 
-__all__ = 'get_proxy', 'check_proxy',
+__all__ = ('get_proxy',
+           'check_proxy',
+           'strip_all',
+           'verify_proxy',
+           'test_time')
 
 PROXIES = [
     '183.91.33.41:83',
@@ -50,5 +54,4 @@ def test_time(func):
     return wrapper
 
 
-if __name__ == '__main__':
-    print(test_time(verify_proxy)(get_proxy()))  # 21s
+def strip_all(string): return "".join(string.split())
