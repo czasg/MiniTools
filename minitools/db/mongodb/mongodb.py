@@ -44,9 +44,9 @@ class MongodbClientCache:
     mongodb = None
 
     @classmethod
-    def get_mongodb_client(cls, **kwargs):
+    def get_mongodb_client(cls, *args, **kwargs):
         if not cls.mongodb:
-            cls.mongodb = pymongo.MongoClient(**kwargs)
+            cls.mongodb = pymongo.MongoClient(*args, **kwargs)
         return cls.mongodb
 
 
