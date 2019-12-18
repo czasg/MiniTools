@@ -30,6 +30,8 @@ def test1():
 
 
 def test2():
+    # todo, 前面第一行加入一些空行，这样就会暴露问题。就需要pipe来过滤一些异常数据
+    # todo, key里面的结构有分行，也就是前几行都是表头，这种情况怎么处理
     html = """<table>"
            "<tbody>"
            "<tr><td>城市</td><td>工资</td><td>喜欢</td></tr>"
