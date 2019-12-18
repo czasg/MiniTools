@@ -55,3 +55,24 @@ def test_time(func):
 
 
 def strip_all(string): return "".join(string.split())
+
+
+import re
+
+
+class SafeRegular:
+
+    def __init__(self, pattern, flags):
+        self.group_nums = re.compile(pattern, flags).groups
+
+    def group(self, g: int = 0):
+        assert 0 <= g <= self.group_nums, "index out of range"
+        return None
+
+    def groups(self):
+        return (None,) * self.group_nums
+
+
+def search_safe(pattern, string: str, flags: int = 0):
+    res = re.search(pattern, string, flags)
+    return res or SafeRegular(pattern, flags)  # todo, safe?
