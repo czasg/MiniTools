@@ -6,7 +6,7 @@ __all__ = ('get_proxy',
            'check_proxy',
            'strip_all',
            'verify_proxy',
-           'test_time')
+           'test_time', 'search_safe')
 
 PROXIES = [
     '183.91.33.41:83',
@@ -57,9 +57,6 @@ def test_time(func):
 def strip_all(string): return "".join(string.split())
 
 
-import re
-
-
 class SafeRegular:
 
     def __init__(self, pattern, flags):
@@ -75,4 +72,4 @@ class SafeRegular:
 
 def search_safe(pattern, string: str, flags: int = 0):
     res = re.search(pattern, string, flags)
-    return res or SafeRegular(pattern, flags)  # todo, safe?
+    return res or SafeRegular(pattern, flags)
