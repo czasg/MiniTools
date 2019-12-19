@@ -2,17 +2,15 @@ import scrapy
 
 from time import time
 from scrapy.cmdline import execute
-from minitools import to_path, check_logger_files
+from minitools import to_path, check_logger_files, from_xpath, xt
 
 from .__pager import *
 from .__utils import *
 from .__template import *
-from .__xpather import *
 
 __all__ = (__pager.__all__ +
            __template.__all__ +
-           __utils.__all__ +
-           __xpather.__all__)
+           __utils.__all__) + ("from_xpath", "xt")
 
 
 class miniSpider(scrapy.Spider):
