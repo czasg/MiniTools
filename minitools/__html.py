@@ -128,5 +128,17 @@ class HtmlTable:
         keys = [col.text for col in rows[0].cols]
         return [dict(zip(keys, value)) for value in values]
 
+    def to_dict_by_one(self):
+        rows = self.rows
+        res = dict()
+        for row in rows:
+            cols = row.cols
+            try:
+                for index in range(0, len(row), 2):
+                    res[cols[index].text] = cols[index + 1].text
+            except:
+                continue
+        return res
+
 
 tableParser = HtmlTable
