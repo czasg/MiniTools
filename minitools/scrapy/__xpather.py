@@ -3,6 +3,8 @@ import html
 
 from enum import IntEnum
 
+from minitools import strip_all
+
 __all__ = ('xt', 'from_xpath')
 
 
@@ -27,10 +29,13 @@ def extract(response, xpath_rule, **kwargs):
     return response.xpath(xpath_rule).extract()
 
 
-def string_join(response, xpath_rule, sep='', strip=True, **kwargs):
-    return sep.join([string.strip() if strip
-                     else string
-                     for string in extract(response, xpath_rule)])
+def string_join(response, xpath_rule, sep='', **kwargs):
+    res = []
+    for string in extract(response, xpath_rule):
+        value = strip_all(string)
+        if value:
+            res.append(value)
+    return sep.join(res)
 
 
 def urljoin(response, xpath_rule, source=None, **kwargs):
