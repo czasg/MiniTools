@@ -3,7 +3,7 @@ import html
 
 from enum import IntEnum
 
-from minitools import strip_all
+from .__utils import strip_all
 
 __all__ = ('xt', 'from_xpath')
 
