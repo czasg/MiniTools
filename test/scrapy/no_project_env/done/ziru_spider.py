@@ -95,7 +95,8 @@ class MySpider(miniSpider):
         self.log(f"new item: {new}", level=logging.INFO)
         if new:
             next_page = from_xpath(response, '//a[text()="下一页"]/@href', xt.urljoin)
-            yield response.request.replace(url=next_page)
+            if isinstance(next_page, str) and next_page.startswith("http"):
+                yield response.request.replace(url=next_page)
 
     @staticmethod
     def close(spider, reason):
