@@ -11,7 +11,7 @@ ANTI_SPIDER_JSL_CLEARANCE_MIDDLEWARE = {
 }
 
 
-class JslClearanceCookieMiddleware:
+class JslClearanceCookieMiddleware:  # todo, 没有考虑全面，存在js代码无法运行的情况
 
     def process_response(self, request, response, spider):
         text = response.text
