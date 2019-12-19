@@ -1,34 +1,11 @@
-import xlrd
-import xlwt
+import numpy as np
+
 from parsel import Selector
+from scrapy.http import Response
 
-from minitools.scrapy import from_xpath, xt
+from .__xpather import from_xpath, xt
 
-"""
-解析出html格式的table
-解析出excel文件中的字段
-解析出work文档中的table
-
-requirements:
-xlrd
-xlwt
-
-需求调研：
-针对html中的table，有常见的<table><tbody><th><tr><td>  - 我们这位这种属于正常。还有表格合并，表示为rowspan和colspan
-目标是转化为什么呢。table标准的key-value形式。col为key，row为value
-0、针对html的标准表格，如何进行转化与解析。
-1、现在的需求是要将excel和word中的表格转化为html形式的表格
-2、将html形式的表格转化为excel形式的表格
-3、将html形式的表格直接一键可视化
-
-必定会出现不友好的合并类表格
-需要约定好解析规则。必须以key作为标准。
-一个key里面多个col合并，则将其合并为一即可。换行划分即可。
-一个key里面多个row合并，则将row拆分为对应数据量的row即可。
-
-恶心的情况：
-key占了两到三行，也就是三个row，这玩意怎么合并，是个大问题
-"""
+__all__ = "tableParser",
 
 
 class Cell:
@@ -40,19 +17,24 @@ class Cell:
 
 
 class RowLine:
-    def __init__(self, cols):
+    def __init__(self, cols, sep=""):
         self.cols = [Cell(
-            from_xpath(col, ".//text()", xt.string_join),
+            from_xpath(col, ".//text()", xt.string_join, sep=sep),
             from_xpath(col, "./@rowspan") or 1,
             from_xpath(col, "./@colspan") or 1,
         ) for col in cols]
 
     def set_col(self, index, text):
-        # length = len(self)
-        # if length <= index:
-        #     self.cols += [None] * (index - length + 1)
-        # self.cols[index] = Cell(text)
+        length = len(self)
+        if length <= index:
+            self.cols += [Cell()] * (index - length + 1)
         self.cols.insert(index, Cell(text))
+
+    @classmethod
+    def from_cells(cls, cells: list):
+        instance = cls([])
+        instance.cols = cells
+        return instance
 
     def __len__(self):
         return len(self.cols)
@@ -60,10 +42,42 @@ class RowLine:
 
 class HtmlTable:
 
-    def __init__(self, selector, rows):
+    @classmethod
+    def create(cls, selector, xpath="//table", sep=""):
+        if isinstance(selector, str):
+            selector = _ = Selector(text=selector)
+        elif isinstance(selector, (Selector, Response)):
+            _ = selector
+        else:
+            raise Exception(f"{cls.__name__} Not Support {type(selector)}")
+
+        tables = selector.xpath(xpath)
+        if tables:
+            selector = tables[0]
+        tbodys = selector.xpath("./tbody")
+        if tbodys:
+            selector = tbodys[0]
+        return cls(_, selector.xpath("./*"), sep=sep)
+
+    def __init__(self, selector, rows, sep=""):
         self.selector = selector
-        self.rows = [RowLine(row.xpath("./*")) for row in rows]
+        self.rows = [RowLine(row.xpath("./*"), sep) for row in rows]
         self.adapter()
+
+    def transpose(self):
+        first_row = self.rows[0]
+        nums = len(first_row)
+        for row in self.rows[1:]:
+            length = len(row)
+            if length == nums:
+                pass
+            elif length > nums:
+                row.cols[:] = row.cols[:nums]
+            elif length < nums:
+                row.cols += [Cell()] * (nums - length)
+        rows = np.array([row.cols for row in self.rows]).transpose()
+        self.rows[:] = [RowLine.from_cells(row) for row in rows]
+        return self
 
     def adapter(self):
         rows = self.rows[:]
@@ -72,6 +86,10 @@ class HtmlTable:
             for y, cell in enumerate(cols):
                 if cell.rowspan > 1 and cell.colspan > 1:
                     for i in range(cell.rowspan):
+                        if i == 0:
+                            for i in range(cell.colspan - 1):
+                                row.set_col(y + i + 1, cell.text)
+                            continue
                         row = self.rows[x + i]
                         for j in range(cell.colspan):
                             row.set_col(y + j, cell.text)
@@ -82,31 +100,13 @@ class HtmlTable:
                     for i in range(cell.colspan - 1):
                         row.set_col(y + i + 1, cell.text)
 
-    @classmethod
-    def from_html(cls, html):
-        selector = _ = Selector(text=html)
-
-        tables = selector.xpath("//table")
-        if tables:
-            selector = tables[0]
-
-        tbodys = selector.xpath("./tbody")
-        if tbodys:
-            selector = tbodys[0]
-
-        return cls(_, selector.xpath("./*"))
-
-    @classmethod
-    def from_xpath(cls, response, xpath):
-        """for scrapy, such as response"""
-
     def tr_pipe(self, filter_func, res_func=lambda x: x):
-        # self.rows[:] = res_func([row for row in self.lengthrows if filter_func(row)])
+        self.rows[:] = res_func([row for row in self.rows if filter_func(row)])
         return self
 
     def td_pipe(self, filter_func, res_func=lambda x: x):
-        # for row in self.rows:
-        #     row.cols[:] = res_func([cell for cell in row.cols if filter_func(cell)])
+        for row in self.rows:
+            row.cols[:] = res_func([cell for cell in row.cols if filter_func(cell)])
         return self
 
     def to_dict(self, default="empty"):
@@ -127,3 +127,6 @@ class HtmlTable:
 
         keys = [col.text for col in rows[0].cols]
         return [dict(zip(keys, value)) for value in values]
+
+
+tableParser = HtmlTable
