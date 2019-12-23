@@ -6,7 +6,8 @@ __all__ = ('get_proxy',
            'check_proxy',
            'strip_all',
            'verify_proxy',
-           'test_time', 'search_safe')
+           'test_time', 'search_safe',
+           'post2json')
 
 PROXIES = [
     '183.91.33.41:83',
@@ -73,3 +74,10 @@ class SafeRegular:
 def search_safe(pattern, string: str, flags: int = 0):
     res = re.search(pattern, string, flags)
     return res or SafeRegular(pattern, flags)
+
+
+def post2json(string):
+    return "\n".join(map(lambda x: f'"{x[0]}":"{x[1]}"',
+                         map(lambda x: x.split(":", 1),
+                             filter(lambda x: x.strip(),
+                                    string.strip().split("\n")))))
