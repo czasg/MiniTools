@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import re
 import time
 import logging
@@ -108,7 +110,7 @@ class MySpider(miniSpider):
         )
         for city in spider.cities:
             doc[city] = spider.mongodb.count({"city": city})
-        statistics.insert_one(doc)
+        statistics.update_one({'timestamp': today}, {"$set": doc}, upsert=True)
 
 
 if __name__ == '__main__':
