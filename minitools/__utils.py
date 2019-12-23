@@ -77,7 +77,7 @@ def search_safe(pattern, string: str, flags: int = 0):
 
 
 def post2json(string):
-    return ",\n".join(map(lambda x: f'"{x[0]}":"{x[1]}"',
+    return ",\n".join(map(lambda x: f'"{x[0].strip()}": "{x[1].strip()}"',
                          map(lambda x: x.split(":", 1),
                              filter(lambda x: x.strip(),
                                     string.strip().split("\n")))))
