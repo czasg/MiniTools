@@ -39,7 +39,7 @@ def string_join(response, xpath_rule, sep='', **kwargs):
 
 
 def urljoin(response, xpath_rule, source=None, **kwargs):
-    urls = [(source or response).urljoin(url) for url in extract(response, xpath_rule)]
+    urls = [(source or response).urljoin(url.strip()) for url in extract(response, xpath_rule)]
     return urls[0] if len(urls) == 1 else urls
 
 
