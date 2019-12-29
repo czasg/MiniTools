@@ -62,7 +62,7 @@ class MySpider(miniSpider):
             "kd": f"{self.query}",
         }
         referer = f"https://www.lagou.com/jobs/list_{self.query}&city={city}"
-        yield FormRequest(f"https://www.lagou.com/jobs/positionAjax.json?px=default"
+        yield FormRequest(f"https://www.lagou.com/jobs/positionAjax.json?px=new"
                           f"&city={city}&needAddtionalResult=false",
                           callback=self.parse_json, formdata=form,
                           meta={"city": city}, headers={"Referer": referer})
@@ -70,13 +70,15 @@ class MySpider(miniSpider):
     def parse_json(self, response):
         json_data = self.check_response(response)
         if json_data:
-            self.cities_statistics.setdefault(
-                response.meta['city'], json_data['content']['positionResult']['totalCount'])
+            city = response.meta['city']
+            count = json_data['content']['positionResult']['totalCount']
+            self.log({city: count})
+            self.cities_statistics.setdefault(city, count)
             yield self.next_city()
 
     @staticmethod
     def close(spider, reason):
-        statistics = mongodb_client[spider.mongodb_db][spider.mongodb_coll]
+        statistics = mongodb_client[spider.mongodb_db][f"{spider.mongodb_coll}_{spider.query}"]
         today = int(timekiller.get_today().timestamp())
         doc = dict(
             timestamp=today,
