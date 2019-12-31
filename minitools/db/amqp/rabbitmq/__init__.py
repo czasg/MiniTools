@@ -22,7 +22,7 @@ class RabbitMQ:
 
         exchange = exchange_params.pop("exchange") if "exchange" in exchange_params else "minitools"
         auto_delete = kwargs.get("auto_delete", False)
-        routing_key = kwargs.get("routing_key")
+        routing_key = kwargs.get("routing_key", "")
         requeue = kwargs.get("requeue", True)
         exchange_params.setdefault("durable", True)
         exchange_params.setdefault("auto_delete", auto_delete)
