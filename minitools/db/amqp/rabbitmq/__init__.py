@@ -60,3 +60,16 @@ class RabbitMQ:
             body=data,
             properties=BasicProperties(priority=priority, **kwargs)
         )
+
+
+class RabbitMQCache:
+    rabbitmq = None
+
+    @classmethod
+    def get_rabbitmq(cls, *args, **kwargs):
+        if not cls.rabbitmq:
+            cls.rabbitmq = RabbitMQ(*args, **kwargs)
+        return cls.rabbitmq
+
+
+get_rabbitmq = RabbitMQCache.get_rabbitmq
