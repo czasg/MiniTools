@@ -1,3 +1,4 @@
+import time
 import logging
 import functools
 
@@ -76,4 +77,40 @@ get_rabbitmq = RabbitMQCache.get_rabbitmq
 
 
 class RestartRabbitMQ:
-    """todo, add restart protect here"""
+
+    def __init__(self, *args, **kwargs):
+        self.max_errors = 5
+        self.args = args
+        self.kwargs = kwargs
+        self.cache = RabbitMQCache
+        self.consumer = self.cache.get_rabbitmq(*args, **kwargs)
+
+    def push(self, data: str, priority: int = None, exchange=None, routing_key=None, **kwargs):
+        while self.max_errors:
+            try:
+                self.consumer.push(data, priority, exchange, routing_key, **kwargs)
+            except Exception as e:
+                logger.error(f"rabbitmq abnormal\n{e}")
+                self._maybe_reconnect()
+            else:
+                break
+
+    def start_consuming(self, callback: Callable = lambda *args: False):
+        while self.max_errors:
+            try:
+                self.consumer.start_consuming(callback)
+            except Exception as e:
+                logger.error(f"rabbitmq abnormal\n{e}")
+                self._maybe_reconnect()
+            else:
+                break
+
+    def _maybe_reconnect(self, delay=30):
+        logger.info("enter rabbitmq retry...")
+        self.max_errors -= 1
+        time.sleep(delay)
+        try:
+            self.cache.rabbitmq = None
+            self.consumer = self.cache.get_rabbitmq(*self.args, **self.kwargs)
+        except:
+            pass
