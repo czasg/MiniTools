@@ -20,7 +20,7 @@ class RabbitMQ:
         connection = BlockingConnection(parameters)
         channel = connection.channel()
 
-        exchange = exchange_params.pop("exchange") if "exchange" in exchange_params else "minitools"
+        exchange = exchange_params.pop("exchange", "minitools")
         auto_delete = kwargs.get("auto_delete", False)
         routing_key = kwargs.get("routing_key", "")
         requeue = kwargs.get("requeue", False)
@@ -73,3 +73,7 @@ class RabbitMQCache:
 
 
 get_rabbitmq = RabbitMQCache.get_rabbitmq
+
+
+class RestartRabbitMQ:
+    """todo, add restart protect here"""
