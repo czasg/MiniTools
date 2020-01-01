@@ -19,7 +19,10 @@ class Emailer:
             else []
 
     def __del__(self):
-        self.server.quit()
+        try:
+            self.server.quit()
+        except:
+            pass
 
     def set_receiver(self, *args):
         self.receiver.extend(args)
