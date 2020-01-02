@@ -1,4 +1,5 @@
 import re
+import time
 import random
 import requests
 
@@ -7,7 +8,7 @@ __all__ = ('get_proxy',
            'strip_all',
            'verify_proxy',
            'test_time', 'search_safe',
-           'post2json')
+           'post2json', 'id_pool')
 
 PROXIES = [
     '183.91.33.41:83',
@@ -78,6 +79,52 @@ def search_safe(pattern, string: str, flags: int = 0):
 
 def post2json(string):
     return ",\n".join(map(lambda x: f'"{x[0].strip()}": "{x[1].strip()}"',
-                         map(lambda x: x.split(":", 1),
-                             filter(lambda x: x.strip(),
-                                    string.strip().split("\n")))))
+                          map(lambda x: x.split(":", 1),
+                              filter(lambda x: x.strip(),
+                                     string.strip().split("\n")))))
+
+
+class SnowFlake:
+    def __init__(self, workerId, datacenterId):
+        self.workerId = workerId
+        self.datacenterId = datacenterId
+        self.sequence = 0
+        self.twepoch = 1288834974657
+        self.workerIdBits = 5
+        self.datacenterIdBits = 5
+        self.maxWorkerId = -1 ^ (-1 << self.workerIdBits)
+        self.maxDatacenterId = -1 ^ (-1 << self.datacenterIdBits)
+        self.sequenceBits = 12
+        self.workerIdShift = self.sequenceBits
+        self.datacenterIdShift = self.sequenceBits + self.workerIdBits
+        self.timestampLeftShift = self.sequenceBits + self.workerIdBits + self.datacenterIdBits
+        self.sequenceMask = -1 ^ (-1 << self.sequenceBits)
+        self.lastTimestamp = -1
+        self.get_current_timestamp = lambda: int(time.time() * 1000)
+
+    @classmethod
+    def from_node(cls, workerId=0, datacenterId=0):
+        return cls(workerId, datacenterId)
+
+    def next_id(self):
+        timestamp = self.get_current_timestamp()
+        if self.lastTimestamp > timestamp:
+            raise Exception()
+        if self.lastTimestamp == timestamp:
+            self.sequence = (self.sequence + 1) & self.sequenceMask
+            if self.sequence == 0:
+                timestamp = self.next_timestamp(timestamp)
+        else:
+            self.sequence = 0
+        self.lastTimestamp = timestamp
+        return ((timestamp - self.twepoch) << self.timestampLeftShift) | \
+               (self.datacenterId << self.datacenterIdShift) | \
+               (self.workerId << self.workerIdShift) | \
+               self.sequence
+
+    def next_timestamp(self, timestamp, next_timestamp=0):
+        while timestamp >= next_timestamp: next_timestamp = self.get_current_timestamp()
+        return next_timestamp
+
+
+id_pool = SnowFlake.from_node()
