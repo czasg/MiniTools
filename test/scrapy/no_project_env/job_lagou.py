@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+from collections import defaultdict
 from minitools import timekiller
 from minitools.db.mongodb import get_mongodb_client
 from minitools.scrapy import miniSpider
@@ -22,7 +23,7 @@ class MySpider(miniSpider):
     cookies_middleware = None
     mongodb_coll = "city_statistics"
     mongodb_db = "job_lagou"
-    cities_statistics = {}
+    cities_statistics = defaultdict(dict)
 
     def check_response(self, response):
         try:
@@ -40,16 +41,27 @@ class MySpider(miniSpider):
 
     def start_requests(self):
         query_city = self.settings.get("query_city", '武汉|深圳')
+        query_keys = self.settings.get("query", 'python')
         self.cities = list(filter(lambda x: x.strip(), query_city.split("|")))
-        self.query = self.settings.get("query", 'python')
+        self.query_keys = list(filter(lambda x: x.strip(), query_keys.split("|")))
+        self.query_keys_backup = self.query_keys.copy()
+        self.cities_backup = self.cities.copy()
+        self.query = self.query_keys.pop()
         yield self.next_city()
+
+    def filling(self):
+        if self.query_keys:
+            self.query = self.query_keys.pop()
+            self.cities = self.cities_backup.copy()
+            return self.next_city()
 
     def next_city(self, city=None):
         try:
             city = city or self.cities.pop()
             self.clear_cookies()
         except:
-            self.log("Cities has exhausted", level=logging.WARNING)
+            self.log(f"{self.query} Cities has exhausted", level=logging.WARNING)
+            return self.filling()
         else:
             return Request(f"https://www.lagou.com/jobs/list_{self.query}&city={city}",
                            self.parse_city, meta={"city": city}, dont_filter=True)
@@ -72,20 +84,21 @@ class MySpider(miniSpider):
         if json_data:
             city = response.meta['city']
             count = json_data['content']['positionResult']['totalCount']
-            self.log({city: count})
-            self.cities_statistics.setdefault(city, count)
+            self.log({'query': self.query, city: count})
+            self.cities_statistics[self.query].setdefault(city, count)
             yield self.next_city()
 
     @staticmethod
     def close(spider, reason):
-        statistics = mongodb_client[spider.mongodb_db][f"{spider.mongodb_coll}_{spider.query}"]
-        today = int(timekiller.get_today().timestamp())
-        doc = dict(
-            timestamp=today,
-            statistics=json.dumps(spider.cities_statistics, ensure_ascii=False),
-        )
-        statistics.update_one({'timestamp': today}, {"$set": doc}, upsert=True)
+        for query in spider.query_keys_backup:
+            statistics = mongodb_client[spider.mongodb_db][f"{spider.mongodb_coll}_{query}"]
+            today = int(timekiller.get_today().timestamp())
+            doc = dict(
+                timestamp=today,
+                statistics=json.dumps(spider.cities_statistics[query], ensure_ascii=False),
+            )
+            statistics.update_one({'timestamp': today}, {"$set": doc}, upsert=True)
 
 
 if __name__ == '__main__':
-    MySpider.run(__file__, suffix="-s query=python -s query_city=北京|上海|广州|深圳|杭州|武汉|成都|南京|西安|长沙|天津|东莞")
+    MySpider.run(__file__, suffix="-s query=python|java -s query_city=北京|上海|广州|深圳|杭州|武汉|成都|南京|西安|长沙|天津|东莞")
