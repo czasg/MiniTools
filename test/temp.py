@@ -1,9 +1,16 @@
 from minitools.db.mongodb import get_mongodb_client
-
+import re
+import json
+import numpy as np
+int_filter = re.compile('([\d.]+)').search
 client = get_mongodb_client()
 
-col = client['house_price']
+# col = client['house_price']
 all_city = ['武汉', '南京', '天津', '广州', '成都', '杭州', '深圳', '上海', '北京']
+lr = 0.0001
+k1 = 0
+k2 = 0
+b = 0
 """
 武汉: 33353|9 {'汉阳', '江岸', '武昌', '东西湖', '硚口', '江夏', '东湖高新', '洪山', '江汉'}
 南京: 9225|8 {'栖霞', '玄武', '鼓楼', '雨花台', '浦口', '秦淮', '建邺', '江宁'}
@@ -24,9 +31,9 @@ all_city = ['武汉', '南京', '天津', '广州', '成都', '杭州', '深圳'
 #     print(f"{city}: {count}|{len(ss)} {ss}")
 
 a = {
-    "武汉": {'汉阳', '江岸', '武昌', '东西湖', '硚口', '江夏', '东湖高新', '洪山', '江汉'},
+    "武汉": {'汉阳', '江岸', '武昌', '东西湖', '硚口', '东湖高新', '洪山', '江汉'},
     "南京": {'栖霞', '玄武', '鼓楼', '雨花台', '浦口', '秦淮', '建邺', '江宁'},
-    "天津": {'西青', '河北', '和平', '南开', '东丽', '河西', '津南', '河东', '北辰', '红桥', '海河教育园区'},
+    "天津": {'西青', '河北', '和平', '南开', '东丽', '河西', '津南', '河东', '北辰', '红桥'},
     "广州": {'花都', '海珠', '越秀', '白云', '增城', '天河', '荔湾', '番禺', '黄埔'},
     "成都": {'成华', '双流', '天府新区', '锦江', '武侯', '高新', '金牛', '青羊'},
     "杭州": {'下城', '江干', '萧山', '滨江', '余杭', '下沙', '钱塘新区', '拱墅', '西湖', '上城'},
@@ -34,6 +41,42 @@ a = {
     "上海": {'青浦', '宝山', '静安', '黄浦', '长宁', '嘉定', '新静安', '浦东', '闵行', '虹口', '徐汇', '普陀', '杨浦', '松江'},
     "北京": {'门头沟', '通州', '东城', '朝阳', '亦庄开发区', '昌平', '丰台', '海淀', '西城', '房山', '石景山', '大兴', '顺义'},
 }
+def compute(dataSetX, dataSetY, k, b, learningRate, maxIter):
+    m = float(len(dataSetX))
+    for i in range(maxIter):
+        k_t = b_t = 0
+        for j in range(int(m)):
+            k_t += (1 / m) * ((k * dataSetX[j] + b) - dataSetY[j]) * dataSetX[j]
+            b_t += (1 / m) * ((k * dataSetX[j] + b) - dataSetY[j])
+        k = k - learningRate * k_t
+        b = b - learningRate * b_t
+    return k, b
+result = {}
+for key, values in a.items():
+    db = client[key]
+    result[key] = {}
+    for value in values:
+        col = db[value]
+        xxx1 = []
+        xxx2 = []
+        yyyy = []
+        k1 = b = 0
+        lr = 0.0001
+        for doc in col.find({}, {'_id':0, 'house_price':1, 'house_area':1, 'distance_from_subway':1}):
+            _x1 = float(int_filter(doc['house_area']).group(1))
+            _x2 = float(int_filter(doc['distance_from_subway']).group(1))
+            y = doc['house_price']
+            xxx1.append(_x1)
+            xxx2.append(_x2)
+            yyyy.append(y)
+        k1, b = compute(xxx1, yyyy, k1, b, lr, 3000)
+        result[key][value] = [k1, b, min(xxx2), np.average(xxx2), max(xxx2)]
+        print(key, value, k1, b)
+# 武汉 江夏 0.0 0.0
+# 天津 海河教育园区 0.0 0.0
+with open('house_price.json', 'w', encoding='utf-8') as f:
+    f.write(json.dumps(result, ensure_ascii=False))
+
 # from collections import defaultdict
 # for key, values in a.items():
 #     source = client['house_price'][key]
@@ -52,13 +95,12 @@ a = {
 #         for doc in col.find({'distance_from_subway': ''}):
 #             print(doc)
 
-import re
-int_filter = re.compile('([\d.]+)').search
 
-lr = 0.0001
-k1 = 0
-k2 = 0
-b = 0
+
+# lr = 0.0001
+# k1 = 0
+# k2 = 0
+# b = 0
 
 # def mulComputeError(dataSetX1, dataSetX2, dataSetY, k1, k2, b, baseError=0):
 #     m = len(dataSetX1)
@@ -81,9 +123,9 @@ b = 0
 # coll = client['南京']['栖霞']
 # m = coll.count_documents({})
 
-xxx1 = []
-xxx2 = []
-yyyy = []
+# xxx1 = []
+# xxx2 = []
+# yyyy = []
 
 # for doc in coll.find({}, {'_id':0, 'house_price':1, 'house_area':1, 'distance_from_subway':1}):
 #     if doc['house_price'] < 100:
