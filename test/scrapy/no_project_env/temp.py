@@ -6,7 +6,7 @@ class MySpider(miniSpider):
     custom_settings = {
         "HTTPERROR_ALLOWED_CODES": [403, 412],
         "USER_AGENT":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.6 Safari/537.36",
-    }  # todo, 没见过的反爬
+    }  # todo, 娌¤杩囩殑鍙嶇埇
     
     def parse(self, response):
         self.log(response.url)
