@@ -89,6 +89,7 @@ class RestartRabbitMQ:
         while self.max_errors:
             try:
                 self.consumer.push(data, priority, exchange, routing_key, **kwargs)
+                self.max_errors = 5
             except Exception as e:
                 logger.error(f"rabbitmq abnormal\n{e}")
                 self._maybe_reconnect()
@@ -99,6 +100,7 @@ class RestartRabbitMQ:
         while self.max_errors:
             try:
                 self.consumer.start_consuming(callback)
+                self.max_errors = 5
             except Exception as e:
                 logger.error(f"rabbitmq abnormal\n{e}")
                 self._maybe_reconnect()
