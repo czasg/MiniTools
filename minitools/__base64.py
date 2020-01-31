@@ -10,7 +10,7 @@ class Base64img:
         return base64.b64encode(byte).decode()
 
     @staticmethod
-    def base642byte(string: str) -> str:
+    def base642byte(string: str) -> bytes:
         return base64.b64decode(string)
 
     @staticmethod
