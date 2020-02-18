@@ -8,7 +8,7 @@ __all__ = ('get_proxy',
            'strip_all',
            'verify_proxy',
            'test_time', 'search_safe',
-           'post2json', 'id_pool')
+           'post2json', 'id_pool', 'valid_list')
 
 PROXIES = [
     '183.91.33.41:83',
@@ -24,6 +24,9 @@ PROXIES = [
 ]  # just for test, no mean here.
 PROXY_WITHOUT_PROTOCOL = re.compile("(?:https?://)*(.*)").search
 VERIFY_URL = "http://httpbin.org/ip"
+
+
+def valid_list(lis): return list(filter(lambda x: x, lis))
 
 
 def get_proxy(): return random.choice(PROXIES)

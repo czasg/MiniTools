@@ -35,6 +35,11 @@ def to_datetime(obj):
 class _DateTimeKiller:
 
     @classmethod
+    def split(cls, dateObj: datetime = None):
+        dateObj = dateObj or cls.get_today()
+        return dateObj.year, dateObj.month, dateObj.day, dateObj.hour, dateObj.minute, dateObj.second
+
+    @classmethod
     def create(cls, *args):
         return datetime(*args)
 

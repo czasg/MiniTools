@@ -7,6 +7,7 @@ from .__dict import *
 from .__email import *
 from .__hashlib import *
 from .__html import *
+from .__json import *
 from .__logging import *
 from .__path import *
 from .__xpather import *
@@ -19,6 +20,7 @@ __all__ = (__base64.__all__ +
            __email.__all__ +
            __hashlib.__all__ +
            __html.__all__ +
+           __json.__all__ +
            __logging.__all__ +
            __path.__all__ +
            __xpather.__all__ +

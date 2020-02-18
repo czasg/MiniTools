@@ -10,15 +10,17 @@ from .__logging import show_dynamic_ratio
 __all__ = ('get_current_path', 'to_path', 'current_file_path', 'path2module',
            'find_file_by_name', 'modify_file_content', 'delete_file_by_name',
            'remove_file', 'remove_folder', 'rename_file', 'MiniCache',
-           'check_logger_files')
+           'check_logger_files', 'make_dir', 'make_file')
 
 
 def get_current_path(file=__file__):
     return os.path.dirname(os.path.abspath(file))
 
 
-def to_path(*args):
-    return (os.sep).join(args)
+def to_path(*args, sep=os.sep, forceStr=False):
+    if forceStr:
+        args = [str(arg) for arg in args]
+    return (sep).join(args)
 
 
 def current_file_path(filename, filepath):
@@ -27,6 +29,15 @@ def current_file_path(filename, filepath):
 
 def path2module(path):
     return '.'.join(filter(lambda x: x, re.split(r'[/\\]|\.py', path)))
+
+
+def make_dir(path, mode=0o777, exist_ok=True):
+    os.makedirs(path, mode, exist_ok=exist_ok)
+
+
+def make_file(file, content=''):
+    with open(file, 'w', encoding='utf-8') as f:
+        f.write(content)
 
 
 def remove_file(filePath):
@@ -41,7 +52,7 @@ def rename_file(old, new):
     os.rename(old, new)
 
 
-def find_file_by_name(filename='', folder='', path='.', findFolder=False):
+def find_file_by_name(filename='', folder='', path='.', findFolder=False, matching=None):
     path_set = set()
     results = []
 
@@ -50,8 +61,13 @@ def find_file_by_name(filename='', folder='', path='.', findFolder=False):
             if currentPath in path_set:
                 continue
             path_set.add(currentPath)
-            if not findFolder and currentPath.endswith(folder) and filename in files:
-                results.append(to_path(currentPath, filename))
+            if not findFolder and currentPath.endswith(folder):
+                if filename in files:
+                    results.append(to_path(currentPath, filename))
+                elif matching:
+                    for file in files:
+                        if getattr(file, matching)(filename):
+                            results.append(to_path(currentPath, file))
             elif findFolder and currentPath.endswith(folder):
                 results.append(currentPath)
             else:
@@ -93,7 +109,8 @@ def modify_file_content(string, replace='', filename='', folder='', path='.'):
     print("file count: {}".format(len(files)))
     print("modify count: {}".format(count))
 
-def check_logger_files(name, path='.', spl='._', expires=60*60*24*3):
+
+def check_logger_files(name, path='.', spl='._', expires=60 * 60 * 24 * 3):
     LOGFER_FILE_SPLIT = re.compile(f'[{spl}]').split
     for currentPath, folders, files in os.walk(path):
         for file in files:
