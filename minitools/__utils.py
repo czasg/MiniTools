@@ -8,7 +8,8 @@ __all__ = ('get_proxy',
            'strip_all',
            'verify_proxy',
            'test_time', 'search_safe',
-           'post2json', 'id_pool', 'valid_list')
+           'post2json', 'id_pool', 'valid_list',
+           'm3u8_to_ts')
 
 PROXIES = [
     '183.91.33.41:83',
@@ -46,6 +47,16 @@ def verify_proxy(proxy):
     except:
         pass
     return False
+
+
+def m3u8_to_ts(url: str, download=None):
+    assert url.endswith("m3u8")
+    text = download(url) if download else requests.get(url, headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
+    }).text
+    base = re.search('(.*)/', url).group(1)
+    for ts in re.findall('(.*?.ts)', text):
+        yield f"{base}/{ts}"
 
 
 def test_time(func):
