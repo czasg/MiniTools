@@ -17,9 +17,17 @@ def get_current_path(file=__file__):
     return os.path.dirname(os.path.abspath(file))
 
 
-def to_path(*args, sep=os.sep, forceStr=False):
+def to_path(*args, sep=os.sep, forceStr=False, split=None):
     if forceStr:
         args = [str(arg) for arg in args]
+    if split:
+        new_args = []
+        start = None
+        for spl in split:
+            index = spl.pop('index')
+            new_args.append(to_path(*args[start:index], **spl))
+            start = index
+        args[:] = new_args
     return (sep).join(args)
 
 
