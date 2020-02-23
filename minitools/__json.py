@@ -5,7 +5,7 @@ __all__ = "DateEncoder", "load_json", "save_json",
 
 
 def load_json(path):
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         return json.loads(f.read())
 
 
