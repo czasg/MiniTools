@@ -1,5 +1,4 @@
-import os
-import string
+from minitools import create_template
 
 __all__ = "template_get", "template_post", "template_ease",
 
@@ -20,8 +19,7 @@ if __name__ == '__main__':
 """
 
 
-def create_template(file_path, method="GET", url=None, formdata=None):
-    assert os.path.exists(file_path), "you may should use `__file__`"
+def _create_template(file_path, method="GET", url=None, formdata=None):
     config = dict()
     config['url'] = url or "https://github.com/CzaOrz"
     if method == "GET":
@@ -34,8 +32,7 @@ def create_template(file_path, method="GET", url=None, formdata=None):
         config['start_requests'] = "yield FormRequest(url, formdata=self.formdata)"
     elif method == "EASE":
         template_string = template_base.format("", "")
-        new_spider_template = string.Template(template_string).substitute(**config).lstrip()
-        return _write_template_into_file(file_path, new_spider_template)
+        return create_template(file_path, template_string, config)
     else:
         raise RuntimeError("just support GET/POST")
     template_string = template_base.format(
@@ -46,22 +43,16 @@ def create_template(file_path, method="GET", url=None, formdata=None):
             $start_requests
         """
     )
-    new_spider_template = string.Template(template_string).substitute(**config).lstrip()
-    return _write_template_into_file(file_path, new_spider_template)
-
-
-def _write_template_into_file(file_path, new_spider_template):
-    with open(file_path, 'w', encoding="utf-8") as f:
-        f.write(new_spider_template)
+    return create_template(file_path, template_string, config)
 
 
 def template_get(file_path, url=None):
-    create_template(file_path, method="GET", url=url)
+    _create_template(file_path, method="GET", url=url)
 
 
 def template_post(file_path, url=None, formdata=None):
-    create_template(file_path, method="POST", url=url, formdata=formdata)
+    _create_template(file_path, method="POST", url=url, formdata=formdata)
 
 
-def template_ease(file_path):
-    create_template(file_path, method="EASE")
+def template_ease(file_path, url=None):
+    _create_template(file_path, method="EASE", url=url)

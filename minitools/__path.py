@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import string
 import shutil
 
 from functools import wraps
@@ -10,7 +11,7 @@ from .__logging import show_dynamic_ratio
 __all__ = ('get_current_path', 'to_path', 'current_file_path', 'path2module',
            'find_file_by_name', 'modify_file_content', 'delete_file_by_name',
            'remove_file', 'remove_folder', 'rename_file', 'MiniCache',
-           'check_logger_files', 'make_dir', 'make_file')
+           'check_logger_files', 'make_dir', 'make_file', 'create_template')
 
 
 def get_current_path(file=__file__):
@@ -58,6 +59,11 @@ def remove_folder(folderPath):
 
 def rename_file(old, new):
     os.rename(old, new)
+
+
+def create_template(path, template, config):
+    text = string.Template(template).substitute(**config).lstrip()
+    make_file(path, text)
 
 
 def find_file_by_name(filename='', folder='', path='.', findFolder=False, matching=None):

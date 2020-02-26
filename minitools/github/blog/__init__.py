@@ -1,7 +1,10 @@
 import os
+import re
+import mistune
+import subprocess
 from minitools import (
     get_current_path, to_path, make_dir, timekiller, make_file, find_file_by_name,
-    valid_list, load_json, save_json
+    valid_list, load_json, save_json, create_template
 )
 from itertools import count
 from datetime import datetime
@@ -9,6 +12,23 @@ from collections import defaultdict
 
 create_time = lambda file: datetime.fromtimestamp(os.path.getctime(file))
 amend_time = lambda file: datetime.fromtimestamp(os.path.getmtime(file))
+
+html_template = """
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
+    <title>$title</title>
+</head>
+<body style="padding: 10px;">
+$body
+</body>
+</html>
+"""
 
 
 class Path:
@@ -77,11 +97,12 @@ class BlogManager:
 
 
 class GatherManager:
-    def __init__(self, path):
-        # self.path = path
+    def __init__(self, path, html=False):
+        self.html = html
         self.handler = BlogManager(path)
-        self.gather_blog_dir = "blog"
+        self.gather_blog_dir = "json"
         self.gather_label_dir = "label"
+        self.gather_html_dir = "html"
         self.settings = "settings.json"
         self.limit = 6
         self.labels = defaultdict(list)
@@ -100,9 +121,12 @@ class GatherManager:
         if not os.path.exists(self.settings):
             self.handler.pather.create_file(
                 self.settings,
-                '{"blog_url": "./blog/blog1.json", "blog_total": 0, "blog_total_page": 0, "blog_last_url": "", "labels": []}')
+                to_path('{"blog_url": ', f'"./{self.gather_blog_dir}/blog1.json"',
+                        ', "blog_total": 0, "blog_total_page": 0, "blog_last_url": "", "labels": []}', sep=''))
         self.handler.pather.create_dir(to_path(self.handler.pather.cur_path, self.gather_blog_dir))
         self.handler.pather.create_dir(to_path(self.handler.pather.cur_path, self.gather_label_dir))
+        if self.html:
+            self.handler.pather.create_dir(to_path(self.handler.pather.cur_path, self.gather_label_dir))
 
     def search_blog(self):
         self.handler.search_blog('.')
@@ -124,8 +148,6 @@ class GatherManager:
 
     def _gather(self, blogs=None, next_url="", label=None):
         results = []
-        result = []
-        row = 1
         for blog in (blogs or self.blogs)[::-1]:
             if not label:
                 blog_info = valid_list(blog.strip(".").split(os.sep))
@@ -142,30 +164,40 @@ class GatherManager:
                 }
                 with open(blog, 'r', encoding='utf-8') as f:
                     text = f.readline()
-                    if text.startswith("<!--"):
-                        template['blog_img'] = f.readline().strip()
-                        template['labels'] = f.readline().strip().split('|')
-                        template['blog_title'] = f.readline().strip()
-                        template['blog_abstract'] = f.readline().strip()
-                        template['blog_content'] = f.readline().strip()
-                        result.append(template)
-                        for _label in template['labels']:
-                            self.labels[_label].append(template)
-                    else:
-                        raise Exception('Invalid blog-content, it should startswith <!--xxx-->')
+                    assert text.startswith("<!--"), 'Invalid blog-content, it should startswith <!--xxx-->'
+                    template['blog_img'] = f.readline().strip()
+                    template['labels'] = f.readline().strip().split('|')
+                    template['blog_title'] = f.readline().strip()
+                    template['blog_abstract'] = f.readline().strip()
+                    template['blog_content'] = f.readline().strip()
+
+                    if self.html:
+                        f.readline()
+                        template["blog_url"] = self._get_html_url(blog_info, template['blog_title'], f.read())
+
+                    results.append(template)
+                    for _label in template['labels']:
+                        self.labels[_label].append(template)
             else:
-                result.append(blog)
-            if row % 3 == 0:
-                results.append(result)
-                result = []
-            row += 1
-        if result:
-            results.append(result)
+                results.append(blog)
         save_json(self.json_file(label=label), {
             "blogs": results,
             "next_url": next_url
         })
         self.blog_id += 1
+
+    def _get_html_url(self, blog_info, title, body):
+        self.handler.pather.create_dir(
+            to_path(self.gather_html_dir, *blog_info[:3])
+        )
+        html_path = to_path(self.gather_html_dir, *blog_info, sep='/') \
+            .replace(self.handler.bloger.prefix, self.gather_html_dir) \
+            .replace(".md", ".html")
+        create_template(html_path, html_template, {
+            "title": title,
+            "body": mistune.markdown(body)
+        })
+        return html_path
 
     def save_settings(self):
         settings = load_json(self.settings)
@@ -193,6 +225,7 @@ class GatherManager:
 
 
 class MdBlog:
+    git_uri = "https://gitee.com/czaOrz/blog.git"
 
     def __init__(self, path):
         self.path = path
@@ -200,5 +233,17 @@ class MdBlog:
     def create(self):
         BlogManager(self.path).create()
 
-    def gather(self):
-        GatherManager(self.path).run()
+    def gather(self, html=False):
+        GatherManager(self.path, html).run()
+
+    def git_clone(self, uri=None):
+        dir = re.search('.*/(.*?)\.', uri or self.git_uri).group(1)
+        git_dir = to_path(get_current_path(__file__), dir)
+        if os.path.exists(git_dir):
+            raise Exception(f'{dir} has exists, if you have git clone it?')
+        try:
+            subprocess.run(f"git clone {self.git_uri}", shell=True)
+            assert os.path.exists(git_dir), 'There may exist some mistakes in GIT'
+        except:
+            import traceback
+            print(traceback.format_exc())
