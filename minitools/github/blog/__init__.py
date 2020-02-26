@@ -24,7 +24,7 @@ html_template = """
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
     <title>$title</title>
 </head>
-<body style="padding: 10px;">
+<body style="padding: 30px;">
 $body
 </body>
 </html>
