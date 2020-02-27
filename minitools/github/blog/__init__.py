@@ -4,7 +4,7 @@ import mistune
 import subprocess
 from minitools import (
     get_current_path, to_path, make_dir, timekiller, make_file, find_file_by_name,
-    valid_list, load_json, save_json, create_template
+    valid_list, load_json, save_json, create_template, show_dynamic_ratio
 )
 from itertools import count
 from datetime import datetime
@@ -105,6 +105,7 @@ class GatherManager:
         self.gather_html_dir = "html"
         self.settings = "settings.json"
         self.limit = 6
+        self.blog_total = 0
         self.labels = defaultdict(list)
         self.author = "CzaOrz"
         self.__init()
@@ -113,7 +114,6 @@ class GatherManager:
     def __init(self):
         self.count = count().__next__
         self.blogs = []
-        self.blog_total = 0
         self.blog_id = 1
 
     def init_settings(self):
@@ -132,6 +132,7 @@ class GatherManager:
         self.handler.search_blog('.')
         self.blogs = self.handler.bloger.blogs[:]
         self.blog_total = len(self.blogs)
+        print(f"已查询到 {self.blog_total} 篇博客")
 
     def json_file(self, file_id=None, label=None):
         if label:
@@ -178,6 +179,7 @@ class GatherManager:
                     results.append(template)
                     for _label in template['labels']:
                         self.labels[_label].append(template)
+                    show_dynamic_ratio(template['blog_id'] + 1, self.blog_total)
             else:
                 results.append(blog)
         save_json(self.json_file(label=label), {
@@ -205,6 +207,8 @@ class GatherManager:
         settings['blog_total_page'] = self.blog_id - 1
         settings['blog_last_url'] = self.json_file(self.blog_id - 1)
         settings['labels'] = []
+        print(f"\n已收集到 {len(self.labels)} 类标签")
+        num = 1
         for name, templates in self.labels.items():
             settings['labels'].append({
                 'name': name,
@@ -216,6 +220,8 @@ class GatherManager:
             self.__init()
             self.blogs[:] = templates
             self.gather(name)
+            show_dynamic_ratio(num, len(self.labels))
+            num += 1
         save_json(self.settings, settings)
 
     def run(self):
@@ -231,18 +237,20 @@ class MdBlog:
         self.path = path
 
     def create(self):
-        BlogManager(self.path).create()
+        bm = BlogManager(self.path)
+        bm.create()
+        print(f"create {bm.pather.blog_path} success")
 
     def gather(self, html=False):
         GatherManager(self.path, html).run()
 
-    def git_clone(self, uri=None):
+    def git_clone(self, git_cmd, uri=None):
         dir = re.search('.*/(.*?)\.', uri or self.git_uri).group(1)
-        git_dir = to_path(get_current_path(__file__), dir)
+        git_dir = to_path(get_current_path(self.path), dir)
         if os.path.exists(git_dir):
             raise Exception(f'{dir} has exists, if you have git clone it?')
         try:
-            subprocess.run(f"git clone {self.git_uri}", shell=True)
+            subprocess.run(f"{git_cmd} clone {self.git_uri}", shell=True)
             assert os.path.exists(git_dir), 'There may exist some mistakes in GIT'
         except:
             import traceback
