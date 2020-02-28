@@ -77,7 +77,6 @@ class MySpider(miniSpider):
                 data_template[res] = int(result.group(2))
 
         # 解析部分
-        results = []
         for area, rows in rows_dict.items():
             table.rows = rows
             for data in table.to_dict():
@@ -95,11 +94,8 @@ class MySpider(miniSpider):
                 data_template['确诊数'] = int(data['确诊'])
                 data_template['疑似数'] = int(data['疑似'])
                 data_template['公布时间'] = '2020-' + '-'.join(date_regex.search(data['通报日期']).groups())
-                results.append(data_template)
-
-        with open('风云武汉-列表数据_{}.json'.format(int(time.time())), 'w', encoding='utf-8') as f:
-            f.write(json.dumps(results, ensure_ascii=False))
+                yield data_template
 
 
 if __name__ == '__main__':
-    MySpider.run(__file__)
+    MySpider.run(__file__, save=True)
