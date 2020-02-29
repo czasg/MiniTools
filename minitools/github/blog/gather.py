@@ -42,10 +42,9 @@ class GatherManager:
         self.labels = defaultdict(list)
         self.config = GatherConfig
         self.blog_manager = BlogManager(self.cur_path)
-        self.__init()
 
     def __init(self):
-        self.page = 1
+        self.page = self.blog_manager.blog_total // self.config.limit + 1
         self.count = count(1).__next__
 
     def save_settings(self):
@@ -56,15 +55,18 @@ class GatherManager:
                         ', "blog_total": 0, "blog_total_page": 0, "blog_last_url": "", "labels": []}', sep=''))
         settings = load_json(self.config.settings)
         settings['blog_total'] = self.blog_total
-        settings['blog_total_page'] = self.page - 1
-        settings['blog_last_url'] = self.config.json_file_path(self.page - 1)
+        settings['blog_total_page'] = self.blog_total // self.config.limit + 1
+        settings['blog_url'] = self.config.json_file_path(settings['blog_total_page'])
+        settings['blog_last_url'] = self.config.json_file_path(1)
         settings['labels'] = []
         for name, blogs in self.labels.items():
+            total = len(blogs)
+            total_page = total // self.config.limit + 1
             settings['labels'].append({
                 'name': name,
-                'url': f'./{self.config.label_dir}/{name}/label1.json',
-                'total': len(blogs),
-                'total_page': len(blogs) // self.config.limit + 1,
+                'url': self.config.label_file_path(name, total_page),
+                'total': total,
+                'total_page': total_page,
             })
         save_json(self.config.settings, settings)
         print(f"\n已收集到 {len(self.labels)} 类标签")
@@ -78,6 +80,7 @@ class GatherManager:
     def search_blog(self):
         self.blog_manager.search_blog('.')
         self.blog_total = self.blog_manager.blog_total
+        self.__init()
         print(f"已查询到 {self.blog_total} 篇博客")
 
     def gather(self):
@@ -99,10 +102,10 @@ class GatherManager:
     def read_and_save(self, blogs: List[Blog], has_url=False):
         if blogs[0].blog_url:
             save_file_path = self.config.label_file_path(self.label, self.page)
-            next_url = self.config.label_file_path(self.label, self.page + 1) if has_url else ""
+            next_url = self.config.label_file_path(self.label, self.page - 1) if has_url else ""
         else:
             save_file_path = self.config.json_file_path(self.page)
-            next_url = self.config.json_file_path(self.page + 1) if has_url else ""
+            next_url = self.config.json_file_path(self.page - 1) if has_url else ""
 
         results = []
         for blog in blogs[::-1]:
@@ -119,7 +122,7 @@ class GatherManager:
             "blogs": results,
             "next_url": next_url
         })
-        self.page += 1
+        self.page -= 1
 
     def read_blog(self, blog):
         blog_info = valid_list(blog.file_path.strip(".").split(os.sep))
@@ -154,8 +157,8 @@ class GatherManager:
         for name, blogs in self.labels.items():
             self.label = name
             make_dir(to_path(self.config.label_dir, name))
-            self.__init()
             self.blog_manager.blogs[:] = blogs[::-1]
+            self.__init()
             self.gather_loop()
             show_dynamic_ratio(num, len(self.labels))
             num += 1
