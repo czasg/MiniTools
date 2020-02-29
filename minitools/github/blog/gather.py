@@ -100,7 +100,6 @@ class GatherManager:
         if blogs[0].blog_url:
             save_file_path = self.config.label_file_path(self.label, self.page)
             next_url = self.config.label_file_path(self.label, self.page + 1) if has_url else ""
-            blogs.reverse()
         else:
             save_file_path = self.config.json_file_path(self.page)
             next_url = self.config.json_file_path(self.page + 1) if has_url else ""
@@ -156,7 +155,7 @@ class GatherManager:
             self.label = name
             make_dir(to_path(self.config.label_dir, name))
             self.__init()
-            self.blog_manager.blogs[:] = blogs
+            self.blog_manager.blogs[:] = blogs[::-1]
             self.gather_loop()
             show_dynamic_ratio(num, len(self.labels))
             num += 1

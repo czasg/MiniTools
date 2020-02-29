@@ -7,9 +7,12 @@ __all__ = ('next_page', 'HostFilter', 'UrlParser')
 
 
 def next_page(url, rule, step=1, replace=None):
-    url = url.replace(*replace) if replace and re.search(replace[0], url) else url
-    rule = re.sub('(.*)(\(.*)', '(\\1)\\2', rule) if rule.count('(') == 1 else None
-    return re.sub(rule, lambda x: f'{x.group(1)}{int(x.group(2)) + step}', url)
+    url = url.replace(*replace) if replace else url
+    rule_compile = re.compile(rule)
+    if rule_compile.groups == 1:
+        rule_compile = re.compile(re.sub('(.*)(\(.*)', '(\\1)\\2', rule))
+    assert rule_compile.groups == 2, "Regex Rule, need one/two `()`"
+    return rule_compile.sub(lambda x: f'{x.group(1)}{int(x.group(2)) + step}', url)
 
 
 class HostFilter:

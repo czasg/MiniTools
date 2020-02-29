@@ -3,7 +3,7 @@ from minitools import next_page, HostFilter
 
 def test_next_page():
     current_page = "https://www.baidu.com/s?ie=UTF-8&wd=test&page=1"
-    print(next_page(current_page, 'page=(\d+)'))
+    print(next_page(current_page, 'page=(\d+)', replace=('baidu', 'google')))
 
 
 def test_HostFilter():
@@ -25,5 +25,5 @@ def test_HostFilter():
 
 if __name__ == '__main__':
     """Test Code"""
-    # test_next_page()
+    test_next_page()
     # test_HostFilter()
