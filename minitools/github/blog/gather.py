@@ -126,9 +126,11 @@ class GatherManager:
 
     def read_blog(self, blog):
         blog_info = valid_list(blog.file_path.strip(".").split(os.sep))
+        dateStart = datetime(*map(int, blog_info[:3])).strftime("%Y-%m-%d")
+        createTime = create_time(blog.file_path)
         blog.blog_url = f"./{to_path(*blog_info, sep='/')}".replace(".md", "")
         blog.blog_author = self.config.author
-        blog.blog_created = create_time(blog.file_path)
+        blog.blog_created = createTime if createTime.startswith(dateStart) else dateStart
         blog.blog_amend = amend_time(blog.file_path)
         with open(blog.file_path, 'r', encoding='utf-8') as f:
             text = f.readline()

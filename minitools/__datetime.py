@@ -40,7 +40,7 @@ class _DateTimeKiller:
         return dateObj.year, dateObj.month, dateObj.day, dateObj.hour, dateObj.minute, dateObj.second
 
     @classmethod
-    def datetimeStr(cls, dateObj: datetime, dateStr="%y-%m-%d %H:%M:%S"):
+    def datetimeStr(cls, dateObj: datetime, dateStr="%Y-%m-%d %H:%M:%S"):
         return dateObj.strftime(dateStr)
 
     @classmethod
