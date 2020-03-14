@@ -9,6 +9,7 @@ __all__ = ('get_proxy',
            'verify_proxy',
            'test_time', 'search_safe',
            'post2json', 'id_pool', 'valid_list',
+           'SnowFlake',
            'm3u8_to_ts')
 
 PROXIES = [

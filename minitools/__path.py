@@ -36,8 +36,8 @@ def make_dir(path, mode=0o777, exist_ok=True):
     os.makedirs(path, mode, exist_ok=exist_ok)
 
 
-def make_file(file, content=''):
-    with open(file, 'w', encoding='utf-8') as f:
+def make_file(file, content='', mode="w", encoding="utf-8"):
+    with open(file, mode, encoding=encoding) as f:
         f.write(content)
 
 
