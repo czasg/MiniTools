@@ -20,6 +20,13 @@ if __name__ == '__main__':
   MySpider.run(__file__)
 ```
 
+2、get next pages Request
+```python
+from minitools.scrapy import next_page_request
+class MySpider(miniSpider):
+  def parse(self, response):
+    yield next_page_request(response, 'page=(\d+)')  # you need fill regex in here
+```
 
 
 
