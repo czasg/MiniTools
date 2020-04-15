@@ -3,7 +3,7 @@ import re
 from urllib.parse import urlparse, urljoin
 from html.parser import HTMLParser
 
-__all__ = ('next_page', 'HostFilter', 'UrlParser')
+__all__ = ('next_page', 'getHeaders', 'HostFilter', 'UrlParser')
 
 
 def next_page(url, rule, step=1, replace=None):
@@ -13,6 +13,18 @@ def next_page(url, rule, step=1, replace=None):
         rule_compile = re.compile(re.sub('(.*)(\(.*)', '(\\1)\\2', rule))
     assert rule_compile.groups == 2, "Regex Rule, need one/two `()`"
     return rule_compile.sub(lambda x: f'{x.group(1)}{int(x.group(2)) + step}', url)
+
+
+def getHeaders(text, headers=None, show=False):
+    regex = re.compile('\s*(.+?):(.*)').search
+    result = headers or {}
+    for line in filter(lambda x: x, text.split('\n')):
+        key, value = regex(line).groups()
+        result[key] = value.strip()
+    if show:
+        from pprint import pprint
+        pprint(result)
+    return result
 
 
 class HostFilter:
