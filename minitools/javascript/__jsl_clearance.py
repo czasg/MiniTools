@@ -3,11 +3,18 @@ import execjs
 __all__ = "get_anti_spider_clearance",
 
 
-def get_anti_spider_clearance(js_string):
+def get_anti_spider_clearance(js_string, url):
     script_content = r"""
 var window = {
- headless: NaN
-}
+     headless: NaN
+    },
+    document = {
+        createElement: function(){
+            return {
+                innerHTML: ''
+            }
+        }
+    };
 var get_cookie = function(js_code) {
     var re = /var.*?pop\(\)\);/
     args = re.exec(js_code)[0]
@@ -32,12 +39,16 @@ var get_cookie = function(js_code) {
 
     var re = /document.cookie='(.*?)\+';Expires/
     cookie = re.exec(doc)[1]
-
-    var re = /.*?'\+(.*)/;
-    key = re.exec(cookie)[1]
-    cookie = cookie.replace("'\+" + key, eval(key))
-    return cookie
-}
-"""
+    """ + \
+                     r"""
+                     cookie = cookie.replace(/document\.createElement.*?firstChild\.href/, '"{}"');
+                     """.format(url) + \
+                     r"""
+                         var re = /.*?'\+(.*)/;
+                         key = re.exec(cookie)[1]
+                         cookie = cookie.replace("'\+" + key, eval(key))
+                         return cookie
+                     }
+                     """
     anti_js = execjs.compile(script_content)
     return anti_js.call("get_cookie", js_string)
