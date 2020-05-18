@@ -1,6 +1,6 @@
 blog_template = """<!--
 {}
-https://ae01.alicdn.com/kf/Haf4d3b0529ba47669bf69c7bfc71a5f1Y.png
+{}
 未定义
 default title
 default abstract
