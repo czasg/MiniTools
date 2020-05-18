@@ -25,19 +25,24 @@ class GatherConfig:
     limit = 6
 
     @classmethod
-    def json_file_path(cls, page):
+    def json_file_path(cls, page, absolute=None):
+        if absolute:
+            return f"{absolute}/{cls.json_dir}/blog{page}.json"
         return f"./{cls.json_dir}/blog{page}.json"
 
     @classmethod
-    def label_file_path(cls, label, page):
+    def label_file_path(cls, label, page, absolute=None):
+        if absolute:
+            return f"{absolute}/{cls.label_dir}/{label}/label{page}.json"
         return f"./{cls.label_dir}/{label}/label{page}.json"
 
 
 class GatherManager:
 
-    def __init__(self, cur_path, html=False):
+    def __init__(self, cur_path, html=False, absolute='.'):
         self.cur_path = get_current_path(cur_path)
         self.html = html
+        self.absolute = absolute
         self.label = ""
         self.labels = defaultdict(list)
         self.config = GatherConfig
@@ -51,20 +56,20 @@ class GatherManager:
         if not os.path.exists(self.config.settings):
             make_file(
                 self.config.settings,
-                to_path('{"blog_url": ', f'"./{self.config.json_dir}/blog1.json"',
+                to_path('{"blog_url": ', f'"{self.absolute}/{self.config.json_dir}/blog1.json"',
                         ', "blog_total": 0, "blog_total_page": 0, "blog_last_url": "", "labels": []}', sep=''))
         settings = load_json(self.config.settings)
         settings['blog_total'] = self.blog_total
         settings['blog_total_page'] = self.blog_total // self.config.limit + 1
-        settings['blog_url'] = self.config.json_file_path(settings['blog_total_page'])
-        settings['blog_last_url'] = self.config.json_file_path(1)
+        settings['blog_url'] = self.config.json_file_path(settings['blog_total_page'], self.absolute)
+        settings['blog_last_url'] = self.config.json_file_path(1, self.absolute)
         settings['labels'] = []
         for name, blogs in self.labels.items():
             total = len(blogs)
             total_page = total // self.config.limit + 1
             settings['labels'].append({
                 'name': name,
-                'url': self.config.label_file_path(name, total_page),
+                'url': self.config.label_file_path(name, total_page, self.absolute),
                 'total': total,
                 'total_page': total_page,
             })
@@ -101,11 +106,11 @@ class GatherManager:
 
     def read_and_save(self, blogs: List[Blog], has_url=False):
         if blogs[0].blog_url:
-            save_file_path = self.config.label_file_path(self.label, self.page)
-            next_url = self.config.label_file_path(self.label, self.page - 1) if has_url else ""
+            save_file_path = self.config.label_file_path(self.label, self.page, )
+            next_url = self.config.label_file_path(self.label, self.page - 1, self.absolute) if has_url else ""
         else:
             save_file_path = self.config.json_file_path(self.page)
-            next_url = self.config.json_file_path(self.page - 1) if has_url else ""
+            next_url = self.config.json_file_path(self.page - 1, self.absolute) if has_url else ""
 
         results = []
         for blog in blogs[::-1]:
@@ -126,15 +131,16 @@ class GatherManager:
 
     def read_blog(self, blog):
         blog_info = valid_list(blog.file_path.strip(".").split(os.sep))
-        dateStart = datetime(*map(int, blog_info[:3])).strftime("%Y-%m-%d")
-        createTime = create_time(blog.file_path)
-        blog.blog_url = f"./{to_path(*blog_info, sep='/')}".replace(".md", "")
+        # dateStart = datetime(*map(int, blog_info[:3])).strftime("%Y-%m-%d")
+        # createTime = create_time(blog.file_path)
+        blog.blog_url = f"{self.absolute}/{to_path(*blog_info, sep='/')}".replace(".md", "")
         blog.blog_author = self.config.author
-        blog.blog_created = createTime if createTime.startswith(dateStart) else dateStart
+        # blog.blog_created = createTime if createTime.startswith(dateStart) else dateStart
         blog.blog_amend = amend_time(blog.file_path)
         with open(blog.file_path, 'r', encoding='utf-8') as f:
             text = f.readline()
             assert text.startswith("<!--"), 'Invalid blog-content, it should startswith <!--xxx-->'
+            blog.blog_created = f.readline().strip()
             blog.blog_img = f.readline().strip()
             blog.labels = f.readline().strip().split('|')
             blog.blog_title = f.readline().strip()

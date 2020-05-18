@@ -1,3 +1,4 @@
+import datetime
 from minitools import (
     get_current_path, to_path, make_dir, timekiller, make_file, find_file_by_name
 )
@@ -42,7 +43,8 @@ class Blog(BlogBase):
 
     def create_file(self, dir_path, num):
         self.blog_url = to_path(dir_path, f"{self.prefix}_{num}{self.suffix}")
-        make_file(self.blog_url, blog_template)
+        make_file(self.blog_url, blog_template.format(
+            timekiller.datetimeStr(datetime.datetime.now())))
 
 
 class BlogManager:
