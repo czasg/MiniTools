@@ -1,5 +1,6 @@
 import re
 import time
+import math
 import random
 import requests
 
@@ -7,7 +8,7 @@ __all__ = ('get_proxy',
            'check_proxy',
            'strip_all',
            'verify_proxy',
-           'test_time', 'search_safe',
+           'test_time', 'search_safe', 'print_tree',
            'post2json', 'id_pool', 'valid_list',
            'SnowFlake',
            'm3u8_to_ts')
@@ -73,6 +74,23 @@ def test_time(func):
 
 
 def strip_all(string): return "".join(string.split())
+
+
+def print_tree(array):
+    index = 1
+    depth = math.ceil(math.log2(len(array)))
+    sep = '  '
+    for i in range(depth):
+        offset = 2 ** i
+        print(sep * (2 ** (depth - i - 1) - 1), end='')
+        line = array[index:index + offset]
+        for j, x in enumerate(line):
+            print("{:>{}}".format(x, len(sep)), end='')
+            interval = 0 if i == 0 else 2 ** (depth - i) - 1
+            if j < len(line) - 1:
+                print(sep * interval, end='')
+        index += offset
+        print()
 
 
 class SafeRegular:
